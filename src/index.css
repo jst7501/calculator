@@ -35,10 +35,9 @@ body {
   inset: 0;
 }
 
-/* 휴대폰 프레임 (데스크탑에서 갤럭시 폰처럼 보이게) */
+/* 모바일: 화면 전체 폭을 사용 (양옆 여백 없음) */
 .phone {
   width: 100%;
-  max-width: 420px;
   height: 100dvh;
   /* 화면을 꽉 채우되 그 이상 늘어나지 않도록 제한 */
   max-height: 100dvh;
@@ -49,8 +48,10 @@ body {
   overflow: hidden;
 }
 
-@media (min-width: 460px) {
+/* 데스크탑/큰 화면에서만 갤럭시 폰 프레임처럼 보이게 */
+@media (min-width: 600px) {
   .phone {
+    width: 420px;
     border-radius: 36px;
     height: min(100dvh, 900px);
     max-height: min(100dvh, 900px);
@@ -199,10 +200,10 @@ body {
 .key {
   aspect-ratio: 1 / 1;
   width: 100%;
-  max-width: 86px;
+  max-width: 96px;
   border: none;
   border-radius: 50%;
-  font-size: clamp(24px, 7vw, 30px);
+  font-size: clamp(26px, 7.5vw, 32px);
   font-weight: 400;
   cursor: pointer;
   display: flex;
