@@ -433,10 +433,14 @@ function makeSteps() {
   return [
     { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 850 },
     { key: 'ios', text: 'iOS 17 · arm64e 단말기 확인됨', status: 'info', ms: 700 },
+    { key: 'sandbox', text: '샌드박스 권한 분석 중', status: 'load', ms: 950 },
     { key: 'jb', text: 'checkm8 익스플로잇 주입 중', status: 'load', ms: 1300 },
     { key: 'fail', text: '코드서명 검증(AMFI)에 차단됨', status: 'fail', ms: 1100 },
     { key: 'retry', text: 'trustcache 우회로 재시도 중', status: 'load', ms: 1300 },
     { key: 'ok', text: '탈옥 성공 · 루트 권한 획득(jailbroken)', status: 'ok', ms: 900 },
+    { key: 'keychain', text: 'Keychain 자격증명 덤프 중', status: 'load', ms: 1050 },
+    { key: 'index', text: '연락처 · 사진 인덱싱 중', status: 'load', ms: 1050 },
+    { key: 'pkg', text: '데이터 패키지 암호화 압축 중', status: 'load', ms: 1050 },
   ]
 }
 
@@ -453,7 +457,7 @@ function makeDossier() {
     { label: '이름', value: '유성무', hot: true },
     { label: '전화번호', value: '010-6291-1572', hot: true },
     { label: '접속 위치', value: '경기도 평택시 진위면', hot: true },
-    { label: '주민등록번호', value: '9' + digits(1) + '****-' + (rnd(2) + 1) + '******', hot: true },
+    { label: '주민등록번호', value: '99' + digits(2) + '**-1******', hot: true },
     { label: '결제정보', value: '수집 완료', done: true },
     { label: '기기 내 연락처', value: '1,' + digits(3) + '건 저장 완료', done: true },
   ]
@@ -486,7 +490,8 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
   useEffect(() => {
     if (stage !== 'processing') return
     if (step >= steps.length) {
-      const t = setTimeout(() => setStage('dossier'), 500)
+      // 마지막엔 '정보 취합 중'을 잠깐 보여준 뒤 dossier로
+      const t = setTimeout(() => setStage('dossier'), 1300)
       return () => clearTimeout(t)
     }
     const t = setTimeout(() => setStep((s) => s + 1), steps[step].ms || 700)
@@ -631,7 +636,10 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
 
       {/* 결제 진행중 — 탈옥 연출 (한 번에 한 단계만) */}
       {stage === 'processing' && (() => {
-        const cur = steps[Math.min(step, steps.length - 1)]
+        const cur =
+          step < steps.length
+            ? steps[step]
+            : { text: '정보 취합 중', status: 'load' }
         return (
           <div className={`pg-overlay drama st-${cur.status}`}>
             <p className="pg-overlay-title">{methodName} 결제 인증 중</p>
