@@ -172,7 +172,7 @@ export default function App() {
     basic: {
       id: 'basic',
       name: '일반 모드',
-      desc: '이번 결과 1회 열람',
+      desc: '이번 계산 결과 1회 열람',
       price: 5900,
       period: '1회',
     },
@@ -374,89 +374,222 @@ function Paywall({ plans, selected, onSelect, won, onClose, onContinue }) {
   )
 }
 
-/* ── 결제 수단 선택 화면 (목업) ── */
+/* ── 결제창 (실제 PG 결제창 형태의 목업) ── */
+const PAY_METHODS = [
+  { id: 'kakao', name: '카카오페이', cls: 'm-kakao', mark: 'pay' },
+  { id: 'naver', name: '네이버페이', cls: 'm-naver', mark: 'N Pay' },
+  { id: 'toss', name: '토스페이', cls: 'm-toss', mark: 'toss' },
+  { id: 'card', name: '신용·체크카드', cls: 'm-card', mark: 'CARD' },
+  { id: 'bank', name: '계좌이체', cls: 'm-bank', mark: 'BANK' },
+  { id: 'phone', name: '휴대폰', cls: 'm-phone', mark: 'PHONE' },
+]
+const CARD_COMPANIES = [
+  '신한', '삼성', '현대', 'KB국민', '롯데', 'BC', '하나', 'NH농협', '우리', '씨티',
+]
+const INSTALLMENTS = ['일시불', '2개월', '3개월', '6개월', '12개월']
+
 function Payment({ plan, won, onBack, onClose }) {
   const [method, setMethod] = useState('kakao')
-  const [done, setDone] = useState(false)
+  const [card, setCard] = useState('신한')
+  const [installment, setInstallment] = useState('일시불')
+  const [agreeAll, setAgreeAll] = useState(false)
+  const [stage, setStage] = useState('form') // 'form' | 'processing' | 'result'
 
-  const methods = [
-    { id: 'kakao', name: '카카오페이', sub: '간편결제', emoji: '💛', cls: 'kakao' },
-    { id: 'naver', name: '네이버페이', sub: '포인트 적립', emoji: '💚', cls: 'naver' },
-    { id: 'toss', name: '토스페이', sub: '간편결제', emoji: '💙', cls: 'toss' },
-    { id: 'card', name: '신용 · 체크카드', sub: '일시불 / 할부', emoji: '💳', cls: 'card' },
-    { id: 'phone', name: '휴대폰 결제', sub: '통신사 청구', emoji: '📱', cls: 'phone' },
-  ]
+  const orderNo =
+    'ORD-' +
+    new Date().toISOString().slice(2, 10).replace(/-/g, '') +
+    '-' +
+    String(Math.abs(plan.price)).padStart(6, '0')
 
-  const handlePay = () => setDone(true)
+  const handlePay = () => {
+    if (!agreeAll) return
+    setStage('processing')
+    setTimeout(() => setStage('result'), 1900)
+  }
+
+  const methodName = PAY_METHODS.find((m) => m.id === method)?.name
 
   return (
-    <div className="sheet payment">
-      <header className="pay-header">
-        <button className="pay-back" onClick={onBack} aria-label="뒤로">
-          ‹
-        </button>
-        <span className="pay-title">결제하기</span>
-        <button className="pay-x" onClick={onClose} aria-label="닫기">
-          ✕
-        </button>
-      </header>
+    <div className="sheet pg">
+      {/* 상단 보안 바 */}
+      <div className="pg-secure">
+        <button className="pg-back" onClick={onBack} aria-label="뒤로">‹</button>
+        <span className="pg-secure-center">
+          <LockIcon /> 안전결제 · SSL 보안
+        </span>
+        <button className="pg-x" onClick={onClose} aria-label="닫기">✕</button>
+      </div>
 
-      <div className="pay-body">
-        <div className="pay-summary">
-          <span className="pay-plan">{plan.name} · {plan.period}</span>
-          <span className="pay-amount">{won(plan.price)}</span>
+      <div className="pg-brandbar">
+        <span className="pg-merchant">갤럭시 계산기</span>
+        <span className="pg-pg">PG · 결제대행</span>
+      </div>
+
+      <div className="pg-body">
+        {/* 주문 정보 */}
+        <div className="pg-order">
+          <div className="pg-order-row">
+            <span className="pg-order-label">상품명</span>
+            <span className="pg-order-val">{plan.name} ({plan.period} 이용권)</span>
+          </div>
+          <div className="pg-order-row">
+            <span className="pg-order-label">주문번호</span>
+            <span className="pg-order-val mono">{orderNo}</span>
+          </div>
+          <div className="pg-order-divider" />
+          <div className="pg-order-row total">
+            <span>결제금액</span>
+            <span className="pg-order-total">{won(plan.price)}</span>
+          </div>
         </div>
 
-        <p className="pay-section-title">결제 수단</p>
-        <div className="pay-methods">
-          {methods.map((m) => (
+        {/* 결제수단 */}
+        <p className="pg-label">결제수단</p>
+        <div className="pg-methods">
+          {PAY_METHODS.map((m) => (
             <button
               key={m.id}
-              className={`pay-method ${m.cls} ${method === m.id ? 'on' : ''}`}
+              className={`pg-method ${m.cls} ${method === m.id ? 'on' : ''}`}
               onClick={() => setMethod(m.id)}
             >
-              <span className="pm-emoji">{m.emoji}</span>
-              <span className="pm-text">
-                <span className="pm-name">{m.name}</span>
-                <span className="pm-sub">{m.sub}</span>
-              </span>
-              <span className={`pm-radio ${method === m.id ? 'on' : ''}`} />
+              <span className="pg-mark">{m.mark}</span>
+              <span className="pg-mname">{m.name}</span>
             </button>
           ))}
         </div>
 
-        <div className="pay-agree">
-          <span className="pay-check">✓</span>
-          주문 내용 확인 및 결제 진행에 동의합니다
-        </div>
+        {/* 카드 상세 (신용카드 선택 시) */}
+        {method === 'card' && (
+          <div className="pg-card-detail">
+            <p className="pg-label">카드사</p>
+            <div className="pg-cards">
+              {CARD_COMPANIES.map((c) => (
+                <button
+                  key={c}
+                  className={`pg-card-chip ${card === c ? 'on' : ''}`}
+                  onClick={() => setCard(c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+            <p className="pg-label">할부 개월</p>
+            <div className="pg-installments">
+              {INSTALLMENTS.map((i) => (
+                <button
+                  key={i}
+                  className={`pg-inst-chip ${installment === i ? 'on' : ''}`}
+                  onClick={() => setInstallment(i)}
+                >
+                  {i}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 간편결제 안내 */}
+        {method !== 'card' && (
+          <div className="pg-simple-note">
+            <SimplePayLogo brand={method} />
+            <p>
+              <strong>{methodName}</strong>로 결제를 진행합니다.
+              <br />
+              결제하기를 누르면 {methodName} 인증창으로 이동합니다.
+            </p>
+          </div>
+        )}
+
+        {/* 약관 동의 */}
+        <button
+          className={`pg-agree ${agreeAll ? 'on' : ''}`}
+          onClick={() => setAgreeAll((v) => !v)}
+        >
+          <span className="pg-agree-check">{agreeAll ? '✓' : ''}</span>
+          <span className="pg-agree-text">
+            <b>전체 동의</b> · 결제 진행 필수 약관에 모두 동의합니다
+          </span>
+        </button>
+        <ul className="pg-terms">
+          <li>구매조건 확인 및 결제 진행 동의 <span>보기</span></li>
+          <li>개인정보 수집·이용 동의 <span>보기</span></li>
+          <li>전자금융거래 이용약관 <span>보기</span></li>
+        </ul>
       </div>
 
-      <div className="pay-footer">
-        <button className="pay-btn" onClick={handlePay}>
+      <div className="pg-footer">
+        <div className="pg-footer-amount">
+          <span>총 결제금액</span>
+          <strong>{won(plan.price)}</strong>
+        </div>
+        <button
+          className={`pg-pay-btn ${!agreeAll ? 'disabled' : ''}`}
+          onClick={handlePay}
+        >
           {won(plan.price)} 결제하기
         </button>
-        <p className="pay-demo-note">데모 화면입니다 · 실제 결제는 진행되지 않습니다</p>
+        <p className="pg-foot-note">
+          본 화면은 데모입니다 · 실제 청구나 결제는 발생하지 않습니다
+        </p>
       </div>
 
-      {done && (
-        <div className="pay-toast" onClick={() => setDone(false)}>
-          <div className="pay-toast-card">
-            <div className="pay-toast-emoji">🧪</div>
-            <p className="pay-toast-title">데모 결제 화면</p>
-            <p className="pay-toast-desc">
-              실제 결제는 연결되어 있지 않습니다.
-              <br />
-              {methods.find((m) => m.id === method)?.name}(으)로 {won(plan.price)}{' '}
-              결제하는 화면입니다.
-            </p>
-            <button className="pay-toast-btn" onClick={() => setDone(false)}>
-              확인
-            </button>
+      {/* 결제 진행중 */}
+      {stage === 'processing' && (
+        <div className="pg-overlay">
+          <div className="pg-spinner" />
+          <p className="pg-overlay-title">{methodName} 결제 진행 중</p>
+          <p className="pg-overlay-sub">인증 및 승인을 처리하고 있어요…</p>
+        </div>
+      )}
+
+      {/* 결제 결과 */}
+      {stage === 'result' && (
+        <div className="pg-overlay result">
+          <div className="pg-result-badge">✓</div>
+          <p className="pg-overlay-title">결제 요청 완료</p>
+          <div className="pg-receipt">
+            <div className="pg-receipt-row">
+              <span>결제수단</span><span>{methodName}{method === 'card' ? ` · ${card} · ${installment}` : ''}</span>
+            </div>
+            <div className="pg-receipt-row">
+              <span>상품</span><span>{plan.name} ({plan.period})</span>
+            </div>
+            <div className="pg-receipt-row">
+              <span>주문번호</span><span className="mono">{orderNo}</span>
+            </div>
+            <div className="pg-receipt-row total">
+              <span>결제금액</span><span>{won(plan.price)}</span>
+            </div>
           </div>
+          <p className="pg-result-demo">
+            ⚠️ 데모 화면입니다. 실제 결제는 연결되어 있지 않으며 어떤 금액도 청구되지 않습니다.
+          </p>
+          <button className="pg-result-btn" onClick={onClose}>확인</button>
         </div>
       )}
     </div>
   )
+}
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  )
+}
+
+function SimplePayLogo({ brand }) {
+  const map = {
+    kakao: { cls: 'm-kakao', mark: 'pay' },
+    naver: { cls: 'm-naver', mark: 'N Pay' },
+    toss: { cls: 'm-toss', mark: 'toss' },
+    bank: { cls: 'm-bank', mark: 'BANK' },
+    phone: { cls: 'm-phone', mark: 'PHONE' },
+  }
+  const b = map[brand] || map.kakao
+  return <span className={`pg-simple-logo ${b.cls}`}>{b.mark}</span>
 }
 
 function HistoryIcon() {

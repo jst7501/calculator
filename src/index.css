@@ -322,10 +322,10 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── 페이월 (다크 테마) ── */
+/* ── 페이월 (밝은 테마) ── */
 .paywall {
-  background: linear-gradient(180deg, #20232f 0%, #161824 100%);
-  color: #eef1f7;
+  background: #efece6;
+  color: #1c1e24;
   overflow-y: auto;
 }
 
@@ -337,8 +337,8 @@ body {
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.08);
-  color: #cdd2e0;
+  background: rgba(0, 0, 0, 0.06);
+  color: #6b6e78;
   font-size: 16px;
   cursor: pointer;
   z-index: 2;
@@ -365,11 +365,12 @@ body {
 }
 
 .paywall-sub {
-  color: #9aa0b3;
+  color: #9a97a0;
   font-size: 15px;
   margin-bottom: 26px;
 }
 
+/* 일반 모드 카드 (흰색) */
 .plan-card {
   display: block;
   width: 100%;
@@ -378,10 +379,11 @@ body {
   padding: 18px 18px 16px;
   margin-bottom: 14px;
   cursor: pointer;
-  background: #272b3a;
-  border: 1.5px solid transparent;
-  color: inherit;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.12s ease;
+  background: #ffffff;
+  border: 1.5px solid #e6e3dc;
+  color: #1c1e24;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
 }
 
 .plan-card:active {
@@ -389,12 +391,16 @@ body {
 }
 
 .plan-card.active {
-  border-color: #6f8bff;
-  background: #2b3047;
+  border-color: #3b5bff;
+  box-shadow: 0 4px 16px rgba(59, 91, 255, 0.14);
 }
 
+/* Pro 모드 카드 (어두운색) */
 .plan-card.pro {
-  background: linear-gradient(160deg, #2a2f45, #232739);
+  background: linear-gradient(160deg, #3a3d48, #2c2e38);
+  border-color: transparent;
+  color: #f1f2f6;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
 }
 
 .plan-card.pro.active {
@@ -419,7 +425,7 @@ body {
 }
 
 .plan-badge {
-  background: #4f7cff;
+  background: #3b5bff;
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -432,20 +438,33 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid #565c75;
+  border: 2px solid #cfccc4;
   flex-shrink: 0;
   transition: border-color 0.2s, background 0.2s;
 }
 
+.plan-card.pro .plan-radio {
+  border-color: #71747f;
+}
+
 .plan-radio.on {
+  border-color: #3b5bff;
+  background: radial-gradient(circle at center, #3b5bff 0 6px, transparent 7px);
+}
+
+.plan-card.pro .plan-radio.on {
   border-color: #6f8bff;
   background: radial-gradient(circle at center, #6f8bff 0 6px, transparent 7px);
 }
 
 .plan-desc {
-  color: #9aa0b3;
+  color: #9a97a0;
   font-size: 13.5px;
   margin: 8px 0 4px;
+}
+
+.plan-card.pro .plan-desc {
+  color: #b6b8c2;
 }
 
 .plan-features {
@@ -490,280 +509,514 @@ body {
 .cta-btn {
   width: 100%;
   border: none;
-  margin-top: 10px;
-  background: linear-gradient(135deg, #4f7cff, #6a5bff);
+  margin-top: 14px;
+  background: #3b5bff;
   color: #fff;
   font-size: 17px;
   font-weight: 700;
-  padding: 17px;
+  padding: 18px;
   border-radius: 16px;
   cursor: pointer;
-  box-shadow: 0 10px 26px rgba(79, 124, 255, 0.45);
-  transition: transform 0.12s ease;
+  box-shadow: 0 10px 24px rgba(59, 91, 255, 0.32);
+  transition: transform 0.12s ease, background 0.18s;
 }
 
 .cta-btn:active {
   transform: scale(0.98);
+  background: #2f49d8;
 }
 
 .paywall-foot {
   text-align: center;
-  color: #6b7186;
+  color: #a7a4ac;
   font-size: 12px;
   margin-top: 16px;
 }
 
-/* ── 결제 수단 화면 (라이트) ── */
-.payment {
-  background: #f4f4f5;
-  color: var(--text-dark);
+/* ── 결제창 (실제 PG 결제창 형태) ── */
+.pg {
+  background: #f1f2f4;
+  color: #1b1d22;
 }
 
-.pay-header {
+/* 상단 보안 바 */
+.pg-secure {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 18px 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: #2b2f3a;
+  color: #e9ecf3;
+  padding: 12px 14px;
   flex-shrink: 0;
 }
 
-.pay-back,
-.pay-x {
+.pg-secure-center {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c6f6d5;
+}
+
+.pg-secure-center svg { color: #6ee7a0; }
+
+.pg-back,
+.pg-x {
   background: none;
   border: none;
-  font-size: 24px;
-  color: #2b2d31;
+  color: #e9ecf3;
+  font-size: 22px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  width: 36px;
-  height: 36px;
   line-height: 1;
 }
 
-.pay-title {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.pay-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 22px;
-  min-height: 0;
-}
-
-.pay-summary {
+.pg-brandbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px 18px;
   background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  margin-bottom: 24px;
+  border-bottom: 1px solid #ececef;
+  flex-shrink: 0;
 }
 
-.pay-plan {
-  font-size: 15px;
-  color: #5a5d66;
-  font-weight: 600;
-}
-
-.pay-amount {
-  font-size: 24px;
+.pg-merchant {
+  font-size: 16px;
   font-weight: 800;
 }
 
-.pay-section-title {
-  font-size: 14px;
+.pg-pg {
+  font-size: 11px;
+  color: #9a9ca1;
+  background: #f2f3f5;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.pg-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 16px 20px;
+  min-height: 0;
+}
+
+/* 주문 정보 */
+.pg-order {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  margin-bottom: 20px;
+}
+
+.pg-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+
+.pg-order-label { color: #8b8e96; flex-shrink: 0; }
+.pg-order-val { color: #2b2d33; font-weight: 600; text-align: right; }
+.mono { font-family: 'SF Mono', ui-monospace, monospace; letter-spacing: -0.3px; }
+
+.pg-order-divider {
+  height: 1px;
+  background: #eef0f2;
+  margin: 6px 0 12px;
+}
+
+.pg-order-row.total {
+  margin-bottom: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pg-order-total {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1b1d22;
+}
+
+.pg-label {
+  font-size: 13px;
   font-weight: 700;
   color: #6b6e78;
-  margin-bottom: 12px;
+  margin: 18px 4px 10px;
+}
+.pg-label:first-child { margin-top: 0; }
+
+/* 결제수단 그리드 */
+.pg-methods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
 }
 
-.pay-methods {
+.pg-method {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #fff;
+  border: 1.5px solid #e6e7ea;
+  border-radius: 13px;
+  padding: 13px 6px 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
 }
 
-.pay-method {
+.pg-method:active { transform: scale(0.97); }
+
+.pg-method.on {
+  border-color: #3182f6;
+  box-shadow: 0 0 0 2.5px rgba(49, 130, 246, 0.16);
+}
+
+.pg-mark {
+  height: 30px;
+  min-width: 56px;
+  padding: 0 10px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.pg-mname {
+  font-size: 12px;
+  font-weight: 600;
+  color: #44474f;
+}
+
+/* 브랜드 컬러 */
+.m-kakao .pg-mark { background: #ffe812; color: #3c1e1e; }
+.m-naver .pg-mark { background: #03c75a; color: #fff; }
+.m-toss .pg-mark { background: #3182f6; color: #fff; font-style: italic; }
+.m-card .pg-mark { background: #4b5563; color: #fff; }
+.m-bank .pg-mark { background: #6b7280; color: #fff; }
+.m-phone .pg-mark { background: #8b5cf6; color: #fff; }
+
+/* 카드 상세 */
+.pg-card-detail {
+  margin-top: 6px;
+  animation: fade-up 0.2s ease;
+}
+
+.pg-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+}
+
+.pg-card-chip {
+  background: #fff;
+  border: 1.5px solid #e6e7ea;
+  border-radius: 10px;
+  padding: 11px 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #44474f;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pg-card-chip.on {
+  border-color: #3182f6;
+  color: #3182f6;
+  background: #f0f6ff;
+}
+
+.pg-installments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.pg-inst-chip {
+  background: #fff;
+  border: 1.5px solid #e6e7ea;
+  border-radius: 20px;
+  padding: 8px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #44474f;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pg-inst-chip.on {
+  border-color: #3182f6;
+  color: #3182f6;
+  background: #f0f6ff;
+}
+
+/* 간편결제 안내 */
+.pg-simple-note {
   display: flex;
   align-items: center;
   gap: 14px;
-  width: 100%;
   background: #fff;
-  border: 1.5px solid transparent;
-  border-radius: 14px;
-  padding: 15px 16px;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.18s, transform 0.1s, box-shadow 0.18s;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  border: 1px solid #ececef;
+  border-radius: 13px;
+  padding: 16px;
+  margin-top: 6px;
 }
 
-.pay-method:active {
-  transform: scale(0.99);
+.pg-simple-note p {
+  font-size: 13px;
+  color: #6b6e78;
+  line-height: 1.55;
 }
 
-.pay-method.on {
-  border-color: #4f7cff;
-  box-shadow: 0 4px 14px rgba(79, 124, 255, 0.18);
-}
+.pg-simple-note strong { color: #2b2d33; }
 
-.pay-method.kakao.on { border-color: #fae100; box-shadow: 0 4px 14px rgba(250,225,0,0.3); }
-.pay-method.naver.on { border-color: #03c75a; box-shadow: 0 4px 14px rgba(3,199,90,0.22); }
-.pay-method.toss.on { border-color: #3182f6; box-shadow: 0 4px 14px rgba(49,130,246,0.2); }
-
-.pm-emoji {
-  font-size: 26px;
-  width: 40px;
-  height: 40px;
+.pg-simple-logo {
+  height: 34px;
+  min-width: 62px;
+  padding: 0 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f2f3f5;
-  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
   flex-shrink: 0;
 }
+.pg-simple-logo.m-kakao { background: #ffe812; color: #3c1e1e; }
+.pg-simple-logo.m-naver { background: #03c75a; color: #fff; }
+.pg-simple-logo.m-toss { background: #3182f6; color: #fff; font-style: italic; }
+.pg-simple-logo.m-bank { background: #6b7280; color: #fff; }
+.pg-simple-logo.m-phone { background: #8b5cf6; color: #fff; }
 
-.pm-text {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.pm-name {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.pm-sub {
-  font-size: 12.5px;
-  color: #9a9ca1;
-  margin-top: 2px;
-}
-
-.pm-radio {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #c7cad2;
-  flex-shrink: 0;
-}
-
-.pm-radio.on {
-  border-color: #4f7cff;
-  background: radial-gradient(circle at center, #4f7cff 0 5px, transparent 6px);
-}
-
-.pay-agree {
+/* 약관 동의 */
+.pg-agree {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  border: 1.5px solid #e6e7ea;
+  border-radius: 13px;
+  padding: 15px 16px;
   margin-top: 22px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.pg-agree.on { border-color: #3182f6; }
+
+.pg-agree-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #c7cad2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.pg-agree.on .pg-agree-check {
+  background: #3182f6;
+  border-color: #3182f6;
+}
+
+.pg-agree-text { font-size: 13.5px; color: #44474f; }
+.pg-agree-text b { font-weight: 700; }
+
+.pg-terms {
+  list-style: none;
+  margin: 12px 6px 0;
+  padding: 0;
+}
+
+.pg-terms li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: #9a9ca1;
+  padding: 6px 0;
+}
+
+.pg-terms li span {
+  color: #9a9ca1;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* 하단 결제 버튼 */
+.pg-footer {
+  flex-shrink: 0;
+  background: #fff;
+  border-top: 1px solid #ececef;
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.pg-footer-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  font-size: 14px;
   color: #6b6e78;
 }
 
-.pay-check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #4f7cff;
-  color: #fff;
-  font-size: 12px;
+.pg-footer-amount strong {
+  font-size: 21px;
+  font-weight: 800;
+  color: #1b1d22;
 }
 
-.pay-footer {
-  flex-shrink: 0;
-  padding: 14px 22px calc(18px + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  background: #f4f4f5;
-}
-
-.pay-btn {
+.pg-pay-btn {
   width: 100%;
   border: none;
-  background: #4f7cff;
+  background: #3182f6;
   color: #fff;
   font-size: 17px;
   font-weight: 700;
   padding: 17px;
   border-radius: 14px;
   cursor: pointer;
-  transition: transform 0.12s ease, background 0.18s;
+  transition: transform 0.12s, background 0.18s;
 }
 
-.pay-btn:active {
-  transform: scale(0.98);
-  background: #3f68e0;
+.pg-pay-btn:active { transform: scale(0.98); background: #2570e0; }
+
+.pg-pay-btn.disabled {
+  background: #c4cdd9;
+  cursor: not-allowed;
 }
 
-.pay-demo-note {
+.pg-foot-note {
   text-align: center;
-  font-size: 12px;
-  color: #9a9ca1;
+  font-size: 11px;
+  color: #b0b2b8;
   margin-top: 10px;
 }
 
-/* 데모 안내 토스트 */
-.pay-toast {
+/* 결제 진행/결과 오버레이 */
+.pg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(245, 246, 248, 0.97);
+  backdrop-filter: blur(2px);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 30px;
-  z-index: 5;
+  z-index: 6;
   animation: fade-in 0.2s ease;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.pg-overlay.result { justify-content: flex-start; padding-top: 56px; overflow-y: auto; }
+
+.pg-spinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 4px solid #d8e3f5;
+  border-top-color: #3182f6;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 22px;
 }
 
-.pay-toast-card {
-  background: #fff;
-  border-radius: 22px;
-  padding: 28px 24px 22px;
-  text-align: center;
-  max-width: 320px;
-  width: 100%;
-  animation: fade-up 0.25s ease;
-}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-.pay-toast-emoji {
-  font-size: 40px;
-  margin-bottom: 10px;
-}
-
-.pay-toast-title {
+.pg-overlay-title {
   font-size: 19px;
   font-weight: 800;
-  margin-bottom: 10px;
+  color: #1b1d22;
+  margin-bottom: 6px;
 }
 
-.pay-toast-desc {
-  font-size: 14px;
-  color: #6b6e78;
-  line-height: 1.6;
-  margin-bottom: 20px;
+.pg-overlay-sub {
+  font-size: 13.5px;
+  color: #8b8e96;
 }
 
-.pay-toast-btn {
+.pg-result-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #03c75a;
+  color: #fff;
+  font-size: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 22px rgba(3, 199, 90, 0.35);
+  animation: pop 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.4);
+}
+
+@keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.pg-receipt {
+  width: 100%;
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  margin: 20px 0 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.pg-receipt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  padding: 8px 0;
+  color: #44474f;
+}
+
+.pg-receipt-row span:first-child { color: #8b8e96; flex-shrink: 0; }
+.pg-receipt-row span:last-child { text-align: right; font-weight: 600; }
+
+.pg-receipt-row.total {
+  border-top: 1px solid #eef0f2;
+  margin-top: 6px;
+  padding-top: 14px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.pg-result-demo {
+  font-size: 12px;
+  color: #b06a00;
+  background: #fff7e6;
+  border: 1px solid #ffe3a8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  line-height: 1.55;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.pg-result-btn {
   width: 100%;
   border: none;
-  background: #4f7cff;
+  background: #1b1d22;
   color: #fff;
   font-size: 16px;
   font-weight: 700;
-  padding: 14px;
-  border-radius: 12px;
+  padding: 16px;
+  border-radius: 14px;
   cursor: pointer;
 }
