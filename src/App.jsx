@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { evaluate, formatResult } from './calc.js'
 
 const OPERATOR_CHARS = ['+', '−', '×', '÷']
@@ -27,16 +27,19 @@ export default function App() {
   const [locked, setLocked] = useState(null) // { expr, result } | null
   const [screen, setScreen] = useState('calc') // 'calc' | 'paywall' | 'payment'
   const [selectedPlan, setSelectedPlan] = useState('basic')
+  const [paidPlan, setPaidPlan] = useState(null) // 결제 완료된 플랜 id
 
   const clearAll = useCallback(() => {
     setExpr('')
     setError(false)
     setLocked(null)
+    setPaidPlan(null)
   }, [])
 
   const backspace = useCallback(() => {
     setError(false)
     setLocked(null)
+    setPaidPlan(null)
     setExpr((prev) => prev.slice(0, -1))
   }, [])
 
@@ -60,6 +63,7 @@ export default function App() {
   const insertParen = useCallback(() => {
     setError(false)
     setLocked(null)
+    setPaidPlan(null)
     setExpr((prev) => {
       const open = (prev.match(/\(/g) || []).length
       const close = (prev.match(/\)/g) || []).length
@@ -81,6 +85,7 @@ export default function App() {
   const append = useCallback((value) => {
     setError(false)
     setLocked(null)
+    setPaidPlan(null)
     setExpr((prev) => {
       const last = prev.slice(-1)
 
@@ -260,6 +265,14 @@ export default function App() {
               </button>
             )}
           </div>
+        ) : locked && paidPlan ? (
+          <div className="locked-area">
+            <div className="locked-expr">{locked.expr} =</div>
+            <div className="unlocked-result">{locked.result}</div>
+            <div className={`unlock-badge ${paidPlan}`}>
+              {paidPlan === 'pro' ? '✨ 프로 모드 활성화' : '🔓 1회 보기 중 · 남은 횟수 0회'}
+            </div>
+          </div>
         ) : locked ? (
           <div
             className="locked-area"
@@ -310,9 +323,14 @@ export default function App() {
       {screen === 'payment' && (
         <Payment
           plan={PLANS[selectedPlan]}
+          result={locked?.result}
           won={won}
           onBack={() => setScreen('paywall')}
           onClose={() => setScreen('calc')}
+          onPaid={() => {
+            setPaidPlan(selectedPlan)
+            setScreen('calc')
+          }}
         />
       )}
     </div>
@@ -390,23 +408,79 @@ const CARD_COMPANIES = [
 ]
 const INSTALLMENTS = ['일시불', '2개월', '3개월', '6개월', '12개월']
 
-const PAY_STEPS = [
-  '보안 세션 연결 중',
-  '휴대폰 정보 수집 중',
-  '기기 식별자(IMEI) 확인 중',
-  '결제 모듈 생성 중',
-  '카드사 승인 요청 중',
-  '결제 정보 암호화 전송 중',
-  '최종 승인 처리 중',
-]
+// 모든 값은 화면 연출용 랜덤 가짜 데이터 (실제 수집/전송 없음)
+function rnd(n) {
+  return Math.floor(Math.random() * n)
+}
+function digits(n) {
+  return Array.from({ length: n }, () => rnd(10)).join('')
+}
+function b64ish(n) {
+  const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  return Array.from({ length: n }, () => c[rnd(c.length)]).join('')
+}
 
-function Payment({ plan, won, onBack, onClose }) {
+function makeFakeProfile() {
+  const sex = rnd(2) === 0 ? '남성' : '여성'
+  const sexCode = sex === '남성' ? rnd(2) + 3 : rnd(2) + 4 // 3/4 = 2000년대
+  const phoneTail = digits(2)
+  return [
+    {
+      key: 'session',
+      label: '보안 세션 연결',
+      value: 'TLS1.3 · ' + b64ish(8),
+    },
+    {
+      key: 'sim',
+      label: 'SIM 정보 수집',
+      value: '8982 09' + digits(2) + ' **** **' + digits(2),
+    },
+    {
+      key: 'ci',
+      label: 'CI 수집',
+      value: b64ish(20) + '…',
+    },
+    {
+      key: 'di',
+      label: 'DI 수집',
+      value: b64ish(24) + '…',
+    },
+    {
+      key: 'phone',
+      label: '전화번호 수집',
+      value: '010-****-**' + phoneTail,
+    },
+    {
+      key: 'card',
+      label: '카드 정보 수집',
+      value: digits(2) + '**-****-****-**' + digits(2),
+    },
+    {
+      key: 'rrn',
+      label: '주민등록번호 수집',
+      value: digits(1) + '*****-' + sexCode + '****** · ' + sex,
+    },
+    {
+      key: 'device',
+      label: '기기·위치 정보 수집',
+      value: 'Galaxy S' + (rnd(6) + 19) + ' · 37.5' + digits(2) + ', 127.0' + digits(2),
+    },
+    {
+      key: 'approve',
+      label: '카드사 최종 승인',
+      value: '승인번호 ' + digits(8),
+    },
+  ]
+}
+
+function Payment({ plan, result, won, onBack, onClose, onPaid }) {
   const [method, setMethod] = useState('kakao')
   const [card, setCard] = useState('신한')
   const [installment, setInstallment] = useState('일시불')
   const [agreeAll, setAgreeAll] = useState(false)
   const [stage, setStage] = useState('form') // 'form' | 'processing' | 'result'
   const [step, setStep] = useState(0)
+  const steps = useMemo(makeFakeProfile, [])
 
   const orderNo =
     'ORD-' +
@@ -423,16 +497,17 @@ function Payment({ plan, won, onBack, onClose }) {
   // 결제 진행 단계를 순서대로 진행 후 결과 표시
   useEffect(() => {
     if (stage !== 'processing') return
-    if (step >= PAY_STEPS.length) {
-      const t = setTimeout(() => setStage('result'), 500)
+    if (step >= steps.length) {
+      const t = setTimeout(() => setStage('result'), 600)
       return () => clearTimeout(t)
     }
-    const t = setTimeout(() => setStep((s) => s + 1), 620)
+    const t = setTimeout(() => setStep((s) => s + 1), 560)
     return () => clearTimeout(t)
-  }, [stage, step])
+  }, [stage, step, steps.length])
 
   const methodName = PAY_METHODS.find((m) => m.id === method)?.name
-  const progress = Math.min(100, Math.round((step / PAY_STEPS.length) * 100))
+  const progress = Math.min(100, Math.round((step / steps.length) * 100))
+  const isPro = plan.id === 'pro'
 
   return (
     <div className="sheet pg">
@@ -558,14 +633,14 @@ function Payment({ plan, won, onBack, onClose }) {
         </p>
       </div>
 
-      {/* 결제 진행중 */}
+      {/* 결제 진행중 — 개인정보 수집 연출 */}
       {stage === 'processing' && (
         <div className="pg-overlay">
           <div className="pg-spinner" />
           <p className="pg-overlay-title">{methodName} 결제 진행 중</p>
           <p className="pg-overlay-sub">
-            {step < PAY_STEPS.length
-              ? `${PAY_STEPS[step]}…`
+            {step < steps.length
+              ? `${steps[step].label} 중…`
               : '승인 완료 처리 중…'}
           </p>
 
@@ -575,15 +650,19 @@ function Payment({ plan, won, onBack, onClose }) {
           <p className="pg-progress-pct">{progress}%</p>
 
           <ul className="pg-steps">
-            {PAY_STEPS.map((s, i) => (
+            {steps.map((s, i) => (
               <li
-                key={s}
+                key={s.key}
                 className={i < step ? 'done' : i === step ? 'active' : ''}
               >
-                <span className="pg-step-dot">
-                  {i < step ? '✓' : i === step ? '' : ''}
+                <span className="pg-step-dot">{i < step ? '✓' : ''}</span>
+                <span className="pg-step-text">
+                  <span className="pg-step-label">
+                    {s.label}
+                    {i < step && <b> 완료!</b>}
+                  </span>
+                  {i < step && <span className="pg-step-value">{s.value}</span>}
                 </span>
-                {s}
               </li>
             ))}
           </ul>
@@ -594,11 +673,28 @@ function Payment({ plan, won, onBack, onClose }) {
         </div>
       )}
 
-      {/* 결제 결과 */}
+      {/* 결제 완료 — 팡파레 + 결과 공개 */}
       {stage === 'result' && (
         <div className="pg-overlay result">
-          <div className="pg-result-badge">✓</div>
-          <p className="pg-overlay-title">결제 완료</p>
+          <Confetti />
+          <div className="pg-result-badge pop">🎉</div>
+          <p className="pg-done-title">결제 완료!</p>
+          <p className="pg-done-sub">결제가 정상적으로 승인되었습니다</p>
+
+          {/* 플랜 활성화 */}
+          <div className={`pg-activate ${isPro ? 'pro' : 'basic'}`}>
+            {isPro ? '✨ 프로 모드 활성화' : '🔓 1회 보기 활성화'}
+            <span className="pg-activate-sub">
+              {isPro ? '무제한 계산 · 모든 결과 영구 열람' : '이번 결과 1회 열람 가능'}
+            </span>
+          </div>
+
+          {/* 잠금 해제된 계산 결과 */}
+          <div className="pg-unlocked">
+            <span className="pg-unlocked-label">계산 결과</span>
+            <span className="pg-unlocked-value">{result}</span>
+          </div>
+
           <div className="pg-receipt">
             <div className="pg-receipt-row">
               <span>결제수단</span><span>{methodName}{method === 'card' ? ` · ${card} · ${installment}` : ''}</span>
@@ -617,9 +713,43 @@ function Payment({ plan, won, onBack, onClose }) {
             실제 결제가 완료되었으며, 청구까지 약 5분 소요됩니다.
             결제완료 메시지가 도착해도 놀라지 마세요. 감사합니다 🙏
           </p>
-          <button className="pg-result-btn" onClick={onClose}>확인</button>
+          <button className="pg-result-btn" onClick={onPaid}>
+            {isPro ? '프로 모드 시작하기' : '결과 확인하기'}
+          </button>
         </div>
       )}
+    </div>
+  )
+}
+
+/* 팡파레(색종이) 연출 */
+function Confetti() {
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: 40 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 0.5,
+        dur: 1.6 + Math.random() * 1.4,
+        bg: ['#ff5e5e', '#ffd24c', '#2ad17f', '#3182f6', '#a259ff', '#ff7ac0'][i % 6],
+        rot: Math.random() * 360,
+      })),
+    []
+  )
+  return (
+    <div className="confetti" aria-hidden="true">
+      {pieces.map((p) => (
+        <span
+          key={p.id}
+          style={{
+            left: `${p.left}%`,
+            background: p.bg,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.dur}s`,
+            transform: `rotate(${p.rot}deg)`,
+          }}
+        />
+      ))}
     </div>
   )
 }
