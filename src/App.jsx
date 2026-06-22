@@ -427,20 +427,49 @@ function b64ish(n) {
   const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
   return Array.from({ length: n }, () => c[rnd(c.length)]).join('')
 }
+function hex(n) {
+  const c = '0123456789abcdef'
+  return Array.from({ length: n }, () => c[rnd(16)]).join('')
+}
+
+// cmd 스타일 가짜 로그 한 줄 생성
+const LOG_POOL = [
+  () => `[*] mapping kernel_task port @ 0x${hex(8)}`,
+  () => `[+] tfp0 acquired (pid ${rnd(900) + 100})`,
+  () => `0x${hex(8)}: ldr x0, [x${rnd(28)}, #0x${hex(2)}]`,
+  () => `[*] patching amfid (MISValidateSignature)`,
+  () => `[+] trustcache patched (${rnd(2000) + 200} entries)`,
+  () => `GET /v2/sync/contacts ${rnd(50) + 1}/${rnd(2000) + 1000}`,
+  () => `POST /upload/IMG_${digits(4)}.HEIC ${rnd(900) + 100}KB 200`,
+  () => `[*] keychain item kSecClassGenericPassword`,
+  () => `[+] decrypt blob ${b64ish(18)}`,
+  () => `kalloc: ${rnd(900) + 100} pages @ 0x${hex(6)}`,
+  () => `[*] resolve _MGCopyAnswer @ 0x${hex(8)}`,
+  () => `sqlite> SELECT * FROM ABPerson LIMIT ${rnd(2000)}`,
+  () => `[+] AddressBook.sqlitedb (${rnd(3000) + 500} rows)`,
+  () => `[*] zip Photos/ ${rnd(99)}% (${rnd(900) + 100}MB)`,
+  () => `tcp 17.253.${rnd(255)}.${rnd(255)}:443 ESTABLISHED`,
+  () => `[+] payload signed ents=platform-application`,
+  () => `[*] dumping /var/mobile/Library/SMS/sms.db`,
+  () => `unc0ver: bootstrap injected ok`,
+]
+function logLine() {
+  return LOG_POOL[rnd(LOG_POOL.length)]()
+}
 
 // 결제 진행 내러티브 (탈옥 연출) — status: load/info/fail/ok
 function makeSteps() {
   return [
-    { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 850 },
-    { key: 'ios', text: 'iOS 17 · arm64e 단말기 확인됨', status: 'info', ms: 700 },
-    { key: 'sandbox', text: '샌드박스 권한 분석 중', status: 'load', ms: 950 },
-    { key: 'jb', text: 'checkm8 익스플로잇 주입 중', status: 'load', ms: 1300 },
-    { key: 'fail', text: '코드서명 검증(AMFI)에 차단됨', status: 'fail', ms: 1100 },
-    { key: 'retry', text: 'trustcache 우회로 재시도 중', status: 'load', ms: 1300 },
-    { key: 'ok', text: '탈옥 성공 · 루트 권한 획득(jailbroken)', status: 'ok', ms: 900 },
-    { key: 'keychain', text: 'Keychain 자격증명 덤프 중', status: 'load', ms: 1050 },
-    { key: 'index', text: '연락처 · 사진 인덱싱 중', status: 'load', ms: 1050 },
-    { key: 'pkg', text: '데이터 패키지 암호화 압축 중', status: 'load', ms: 1050 },
+    { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 1300 },
+    { key: 'ios', text: 'iOS 17 · arm64e 단말기 확인됨', status: 'info', ms: 1100 },
+    { key: 'sandbox', text: '샌드박스 권한 분석 중', status: 'load', ms: 1600 },
+    { key: 'jb', text: 'checkm8 익스플로잇 주입 중', status: 'load', ms: 2200 },
+    { key: 'fail', text: '코드서명 검증(AMFI)에 차단됨', status: 'fail', ms: 1800 },
+    { key: 'retry', text: 'trustcache 우회로 재시도 중', status: 'load', ms: 2200 },
+    { key: 'ok', text: '탈옥 성공 · 루트 권한 획득(jailbroken)', status: 'ok', ms: 1500 },
+    { key: 'keychain', text: 'Keychain 자격증명 덤프 중', status: 'load', ms: 1800 },
+    { key: 'index', text: '연락처 · 사진 인덱싱 중', status: 'load', ms: 1800 },
+    { key: 'pkg', text: '데이터 패키지 암호화 압축 중', status: 'load', ms: 1800 },
   ]
 }
 
@@ -457,7 +486,7 @@ function makeDossier() {
     { label: '이름', value: '유성무', hot: true },
     { label: '전화번호', value: '010-6291-1572', hot: true },
     { label: '접속 위치', value: '경기도 평택시 진위면', hot: true },
-    { label: '주민등록번호', value: '99' + digits(2) + '**-1******', hot: true },
+    { label: '주민등록번호', value: '990801-1******', hot: true },
     { label: '결제정보', value: '수집 완료', done: true },
     { label: '기기 내 연락처', value: '1,' + digits(3) + '건 저장 완료', done: true },
   ]
@@ -491,7 +520,7 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
     if (stage !== 'processing') return
     if (step >= steps.length) {
       // 마지막엔 '정보 취합 중'을 잠깐 보여준 뒤 dossier로
-      const t = setTimeout(() => setStage('dossier'), 1300)
+      const t = setTimeout(() => setStage('dossier'), 2000)
       return () => clearTimeout(t)
     }
     const t = setTimeout(() => setStep((s) => s + 1), steps[step].ms || 700)
@@ -667,6 +696,8 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
             <p className="pg-overlay-warn">
               결제가 진행 중입니다. 창을 닫지 마세요.
             </p>
+
+            <HackerLog />
           </div>
         )
       })()}
@@ -838,6 +869,35 @@ function BackgroundUploads() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/* cmd 스타일 빠른 로그 콘솔 */
+function HackerLog() {
+  const [lines, setLines] = useState(() =>
+    Array.from({ length: 12 }, logLine)
+  )
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLines((prev) => [...prev, logLine()].slice(-80))
+    }, 55)
+    return () => clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    if (ref.current) ref.current.scrollTop = ref.current.scrollHeight
+  })
+
+  return (
+    <div className="hacker-log" ref={ref} aria-hidden="true">
+      {lines.map((l, i) => (
+        <div key={i} className="hl-line">
+          {l}
+        </div>
+      ))}
     </div>
   )
 }
