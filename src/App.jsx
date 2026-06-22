@@ -28,6 +28,7 @@ export default function App() {
   const [screen, setScreen] = useState('calc') // 'calc' | 'paywall' | 'payment'
   const [selectedPlan, setSelectedPlan] = useState('basic')
   const [paidPlan, setPaidPlan] = useState(null) // 결제 완료된 플랜 id
+  const [proUnlocked, setProUnlocked] = useState(false) // 프로 영구 활성화
 
   const clearAll = useCallback(() => {
     setExpr('')
@@ -49,15 +50,21 @@ export default function App() {
       const result = evaluate(expr)
       const formatted = formatResult(result)
       setHistory((h) => [{ expr, result: formatted }, ...h].slice(0, 50))
-      // 결과를 바로 보여주지 않고 잠금 + 결제 모달 즉시 표시
-      setLocked({ expr, result: formatted })
-      setScreen('paywall')
+      if (proUnlocked) {
+        // 프로 활성화 후엔 모달 없이 결과 바로 표시
+        setLocked({ expr, result: formatted })
+        setPaidPlan('pro')
+      } else {
+        // 결과를 바로 보여주지 않고 잠금 + 결제 모달 즉시 표시
+        setLocked({ expr, result: formatted })
+        setScreen('paywall')
+      }
       setError(false)
     } catch {
       setError(true)
       setLocked(null)
     }
-  }, [expr])
+  }, [expr, proUnlocked])
 
   // 괄호 자동 판단: 열린 괄호 수와 직전 문자로 ( 또는 ) 결정
   const insertParen = useCallback(() => {
@@ -329,6 +336,7 @@ export default function App() {
           onClose={() => setScreen('calc')}
           onPaid={() => {
             setPaidPlan(selectedPlan)
+            if (selectedPlan === 'pro') setProUnlocked(true)
             setScreen('calc')
           }}
         />
@@ -425,7 +433,7 @@ function makeSteps() {
   return [
     { key: 'session', label: '보안 세션 연결', value: 'TLS1.3 · ' + b64ish(8) },
     { key: 'module', label: '결제 모듈 생성', value: 'PG-' + digits(6) },
-    { key: 'scan', label: '단말기 정보 스캔', value: 'Galaxy S' + (rnd(6) + 19) },
+    { key: 'scan', label: '단말기 정보 스캔', value: 'iPhone 1' + (rnd(4) + 2) + ' Pro · iOS' },
     { key: 'sim', label: 'SIM 정보 수집', value: '8982 09' + digits(2) + ' **** **' + digits(2) },
     { key: 'approve', label: '카드사 승인 요청', value: '승인번호 ' + digits(8) },
     { key: 'encrypt', label: '결제 정보 암호화 전송', value: 'AES-256 · ' + b64ish(6) },
@@ -435,6 +443,7 @@ function makeSteps() {
 // 마지막 dossier (장난 타겟 — 일부 항목은 고정, 나머지는 랜덤 연출 값)
 function makeDossier() {
   return [
+    { label: '기기', value: 'iPhone 1' + (rnd(4) + 2) + ' Pro · iOS' },
     { label: 'SIM 코드', value: '8982 09' + digits(2) + ' ' + digits(4) + ' ' + digits(4) },
     { label: 'CI', value: b64ish(30) },
     { label: 'DI', value: b64ish(30) },
@@ -656,21 +665,23 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
         </div>
       )}
 
-      {/* 정보 수집 dossier — 글자가 슥슥 등장 */}
+      {/* 정보 수집 dossier — 결제화면처럼 자연스럽게 슥슥 등장 */}
       {stage === 'dossier' && (
         <div className="pg-dossier" onClick={() => setStage('result')}>
-          <div className="pg-dossier-scan" />
-          <p className="pg-dossier-warn">⚠ ACCESS GRANTED</p>
-          <h2 className="pg-dossier-title">
-            <Typewriter text="정보 수집을 완료했습니다" speed={70} />
-          </h2>
+          <div className="pg-dossier-head">
+            <div className="pg-dossier-check">✓</div>
+            <h2 className="pg-dossier-title">
+              <Typewriter text="정보 수집을 완료했습니다" speed={60} />
+            </h2>
+            <p className="pg-dossier-desc">결제 인증에 필요한 정보를 확인했어요</p>
+          </div>
 
           <ul className="pg-dossier-list">
             {dossier.map((d, i) => (
               <li
                 key={d.label}
                 className={`${d.hot ? 'hot' : ''} ${d.done ? 'done' : ''}`}
-                style={{ animationDelay: `${1.4 + i * 0.36}s` }}
+                style={{ animationDelay: `${1.3 + i * 0.34}s` }}
               >
                 <span className="dl-label">{d.label}</span>
                 <span className="dl-value">
@@ -694,11 +705,14 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
 
           {/* 플랜 활성화 */}
           <div className={`pg-activate ${isPro ? 'pro' : 'basic'}`}>
-            {isPro ? '✨ 프로 모드 활성화' : '🔓 1회 보기 활성화'}
+            {isPro ? '✨ 프로 모드 활성화 완료!' : '🔓 1회 보기 활성화'}
             <span className="pg-activate-sub">
               {isPro ? '무제한 계산 · 모든 결과 영구 열람' : '이번 결과 1회 열람 가능'}
             </span>
           </div>
+
+          {/* 백그라운드 동기화 (연출) */}
+          <BackgroundUploads />
 
           {/* 잠금 해제된 계산 결과 */}
           <div className="pg-unlocked">
@@ -751,6 +765,74 @@ function Typewriter({ text, speed = 60 }) {
       {text.slice(0, n)}
       <span className="tw-caret" />
     </>
+  )
+}
+
+/* 백그라운드 동기화 연출 (연락처 → 갤러리) */
+function BackgroundUploads() {
+  const [phase, setPhase] = useState('contacts') // 'contacts' | 'gallery'
+  const [cPct, setCPct] = useState(0)
+  const [gCount, setGCount] = useState(0)
+  const G_TOTAL = 3418
+
+  useEffect(() => {
+    if (phase !== 'contacts') return
+    const id = setInterval(() => {
+      setCPct((p) => {
+        const next = p + 4
+        if (next >= 100) {
+          clearInterval(id)
+          setTimeout(() => setPhase('gallery'), 600)
+          return 100
+        }
+        return next
+      })
+    }, 110)
+    return () => clearInterval(id)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'gallery') return
+    // 아주 느리게 (사실상 끝나지 않음)
+    const id = setInterval(() => {
+      setGCount((c) => Math.min(G_TOTAL, c + 1))
+    }, 950)
+    return () => clearInterval(id)
+  }, [phase])
+
+  const gPct = (gCount / G_TOTAL) * 100
+
+  return (
+    <div className="pg-uploads">
+      <div className="pg-upload">
+        <div className="pg-upload-head">
+          <span>📇 연락처 DB 업로드 {phase === 'contacts' ? '중' : '완료'}</span>
+          <span className="pg-upload-pct">
+            {phase === 'contacts' ? `${cPct}%` : '✓'}
+          </span>
+        </div>
+        <div className="pg-up-bar">
+          <div
+            className={`pg-up-fill ${phase !== 'contacts' ? 'done' : ''}`}
+            style={{ width: phase === 'contacts' ? `${cPct}%` : '100%' }}
+          />
+        </div>
+      </div>
+
+      {phase === 'gallery' && (
+        <div className="pg-upload">
+          <div className="pg-upload-head">
+            <span>🖼️ 갤러리 이미지 저장 중</span>
+            <span className="pg-upload-pct">
+              {gCount.toLocaleString()} / {G_TOTAL.toLocaleString()}
+            </span>
+          </div>
+          <div className="pg-up-bar">
+            <div className="pg-up-fill" style={{ width: `${gPct}%` }} />
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
