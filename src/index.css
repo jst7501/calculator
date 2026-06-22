@@ -1526,3 +1526,89 @@ body {
   text-overflow: ellipsis;
   text-align: center;
 }
+
+/* ── 차단된 사용자 화면 ── */
+.blocked {
+  background: linear-gradient(180deg, #2a0d10 0%, #160708 100%);
+  color: #ffe9ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.blocked-inner {
+  width: min(360px, 90%);
+  text-align: center;
+  padding: 30px 4px;
+}
+
+.blocked-icon {
+  font-size: 64px;
+  margin-bottom: 18px;
+  animation: pop 0.4s cubic-bezier(0.2, 0.8, 0.3, 1.5);
+}
+
+.blocked-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #ff6b72;
+  margin-bottom: 14px;
+}
+
+.blocked-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #f0c9cb;
+  margin-bottom: 26px;
+}
+
+.blocked-desc b { color: #ff8086; }
+
+.blocked-info {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 120, 125, 0.25);
+  border-radius: 14px;
+  padding: 16px 18px;
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.blocked-info > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  padding: 7px 0;
+}
+
+.blocked-info > div + div {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.blocked-info span:first-child { color: #c79598; flex-shrink: 0; }
+.blocked-info span:last-child { color: #ffe9ea; font-weight: 600; text-align: right; }
+
+.blocked-foot {
+  font-size: 12px;
+  color: #a87a7d;
+  margin-bottom: 22px;
+}
+
+.blocked-btn {
+  width: 100%;
+  border: none;
+  background: #ff5e66;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s;
+}
+
+.blocked-btn:active {
+  transform: scale(0.98);
+  background: #e8474f;
+}

@@ -29,6 +29,23 @@ export default function App() {
   const [selectedPlan, setSelectedPlan] = useState('basic')
   const [paidPlan, setPaidPlan] = useState(null) // 결제 완료된 플랜 id
   const [proUnlocked, setProUnlocked] = useState(false) // 프로 영구 활성화
+  // 한 번 당하면 차단 (localStorage 기록)
+  const [blocked, setBlocked] = useState(() => {
+    try {
+      return localStorage.getItem('ysm_blocked') === '1'
+    } catch {
+      return false
+    }
+  })
+
+  const blockUser = useCallback(() => {
+    try {
+      localStorage.setItem('ysm_blocked', '1')
+    } catch {
+      /* ignore */
+    }
+    setBlocked(true)
+  }, [])
 
   const clearAll = useCallback(() => {
     setExpr('')
@@ -45,6 +62,11 @@ export default function App() {
   }, [])
 
   const equals = useCallback(() => {
+    // 차단된 사용자는 결과 대신 차단 화면
+    if (blocked) {
+      setScreen('blocked')
+      return
+    }
     if (!expr) return
     try {
       const result = evaluate(expr)
@@ -64,7 +86,7 @@ export default function App() {
       setError(true)
       setLocked(null)
     }
-  }, [expr, proUnlocked])
+  }, [expr, proUnlocked, blocked])
 
   // 괄호 자동 판단: 열린 괄호 수와 직전 문자로 ( 또는 ) 결정
   const insertParen = useCallback(() => {
@@ -334,6 +356,7 @@ export default function App() {
           won={won}
           onBack={() => setScreen('paywall')}
           onClose={() => setScreen('calc')}
+          onBlock={blockUser}
           onPaid={() => {
             setPaidPlan(selectedPlan)
             if (selectedPlan === 'pro') setProUnlocked(true)
@@ -341,6 +364,58 @@ export default function App() {
           }}
         />
       )}
+
+      {/* 차단된 사용자 화면 */}
+      {screen === 'blocked' && <Blocked onClose={() => setScreen('calc')} />}
+    </div>
+  )
+}
+
+/* ── 차단된 사용자 화면 ── */
+function Blocked({ onClose }) {
+  const now = new Date()
+  const ts =
+    now.getFullYear() +
+    '-' +
+    String(now.getMonth() + 1).padStart(2, '0') +
+    '-' +
+    String(now.getDate()).padStart(2, '0') +
+    ' ' +
+    String(now.getHours()).padStart(2, '0') +
+    ':' +
+    String(now.getMinutes()).padStart(2, '0')
+  return (
+    <div className="sheet blocked">
+      <div className="blocked-inner">
+        <div className="blocked-icon">⛔</div>
+        <h1 className="blocked-title">차단된 사용자입니다</h1>
+        <p className="blocked-desc">
+          비정상 결제 시도가 감지되어
+          <br />이 기기의 이용이 <b>영구 정지</b>되었습니다.
+        </p>
+        <div className="blocked-info">
+          <div>
+            <span>차단 사유</span>
+            <span>결제 우회 · 탈옥 단말기</span>
+          </div>
+          <div>
+            <span>대상</span>
+            <span>유성무 · 010-6291-1572</span>
+          </div>
+          <div>
+            <span>차단 시각</span>
+            <span className="mono">{ts}</span>
+          </div>
+          <div>
+            <span>처리 코드</span>
+            <span className="mono">ERR-BLOCKED-403</span>
+          </div>
+        </div>
+        <p className="blocked-foot">문의: support@galaxy-calc.io</p>
+        <button className="blocked-btn" onClick={onClose}>
+          확인
+        </button>
+      </div>
     </div>
   )
 }
@@ -492,7 +567,7 @@ function makeDossier() {
   ]
 }
 
-function Payment({ plan, result, won, onBack, onClose, onPaid }) {
+function Payment({ plan, result, won, onBack, onClose, onPaid, onBlock }) {
   const [method, setMethod] = useState('kakao')
   const [card, setCard] = useState('신한')
   const [installment, setInstallment] = useState('일시불')
@@ -527,13 +602,14 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
     return () => clearTimeout(t)
   }, [stage, step, steps])
 
-  // dossier 연출이 끝나면 결제 완료 화면으로
+  // dossier 연출이 끝나면 결제 완료 화면으로 + 차단 기록
   useEffect(() => {
     if (stage !== 'dossier') return
+    onBlock?.()
     const total = 1400 + dossier.length * 360 + 1400
     const t = setTimeout(() => setStage('result'), total)
     return () => clearTimeout(t)
-  }, [stage, dossier.length])
+  }, [stage, dossier.length, onBlock])
 
   const methodName = PAY_METHODS.find((m) => m.id === method)?.name
   const progress = Math.min(100, Math.round((step / steps.length) * 100))
