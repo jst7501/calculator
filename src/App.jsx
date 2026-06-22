@@ -609,7 +609,7 @@ function makeDossier() {
     { label: '접속 위치', value: '경기도 화성시 봉담읍', hot: true },
     { label: '주민등록번호', value: '991215-1******', hot: true },
     { label: '결제정보', value: '수집 완료', done: true },
-    { label: '기기 내 연락처', value: '1,' + digits(3) + '건 저장 완료', done: true },
+    { label: '기기 내 연락처', value: '70개 저장 완료', done: true },
   ]
 }
 
