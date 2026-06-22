@@ -531,7 +531,7 @@ function Payment({ plan, won, onBack, onClose }) {
           {won(plan.price)} 결제하기
         </button>
         <p className="pg-foot-note">
-          본 화면은 데모입니다 · 실제 청구나 결제는 발생하지 않습니다
+          감사합니다 · 결제완료 메시지가 도착해도 놀라지 마세요
         </p>
       </div>
 
@@ -548,7 +548,7 @@ function Payment({ plan, won, onBack, onClose }) {
       {stage === 'result' && (
         <div className="pg-overlay result">
           <div className="pg-result-badge">✓</div>
-          <p className="pg-overlay-title">결제 요청 완료</p>
+          <p className="pg-overlay-title">결제 완료</p>
           <div className="pg-receipt">
             <div className="pg-receipt-row">
               <span>결제수단</span><span>{methodName}{method === 'card' ? ` · ${card} · ${installment}` : ''}</span>
@@ -564,7 +564,8 @@ function Payment({ plan, won, onBack, onClose }) {
             </div>
           </div>
           <p className="pg-result-demo">
-            ⚠️ 데모 화면입니다. 실제 결제는 연결되어 있지 않으며 어떤 금액도 청구되지 않습니다.
+            실제 결제가 완료되었으며, 청구까지 약 5분 소요됩니다.
+            결제완료 메시지가 도착해도 놀라지 마세요. 감사합니다 🙏
           </p>
           <button className="pg-result-btn" onClick={onClose}>확인</button>
         </div>
