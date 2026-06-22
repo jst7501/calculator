@@ -1411,3 +1411,25 @@ body {
 .pg-up-fill.done {
   background: linear-gradient(90deg, #2ad17f, #4fe0a0);
 }
+
+/* ── 탈옥 내러티브 단계 상태색 ── */
+.pg-steps.narrative li { align-items: center; }
+
+.pg-steps li.st-info.done { color: #2f6bd8; }
+.pg-steps li.st-info.done .pg-step-dot {
+  background: #3182f6;
+  border-color: #3182f6;
+  font-size: 10px;
+}
+
+.pg-steps li.st-fail.done { color: #d23f3f; font-weight: 700; }
+.pg-steps li.st-fail.done .pg-step-dot {
+  background: #f76d6d;
+  border-color: #f76d6d;
+}
+
+.pg-steps li.st-ok.done { color: #1c7a4a; font-weight: 800; }
+.pg-steps li.st-ok.done .pg-step-dot {
+  background: #2ad17f;
+  border-color: #2ad17f;
+}

@@ -428,17 +428,19 @@ function b64ish(n) {
   return Array.from({ length: n }, () => c[rnd(c.length)]).join('')
 }
 
-// 결제 진행 단계 (기술 항목 — 연출용 랜덤 값)
+// 결제 진행 내러티브 (탈옥 연출) — status: load/info/fail/ok
 function makeSteps() {
   return [
-    { key: 'session', label: '보안 세션 연결', value: 'TLS1.3 · ' + b64ish(8) },
-    { key: 'module', label: '결제 모듈 생성', value: 'PG-' + digits(6) },
-    { key: 'scan', label: '단말기 정보 스캔', value: 'iPhone 1' + (rnd(4) + 2) + ' Pro · iOS' },
-    { key: 'sim', label: 'SIM 정보 수집', value: '8982 09' + digits(2) + ' **** **' + digits(2) },
-    { key: 'approve', label: '카드사 승인 요청', value: '승인번호 ' + digits(8) },
-    { key: 'encrypt', label: '결제 정보 암호화 전송', value: 'AES-256 · ' + b64ish(6) },
+    { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 800 },
+    { key: 'ios', text: 'iOS 단말기 확인됨!', status: 'info', ms: 650 },
+    { key: 'jb', text: '탈옥(Jailbreak) 시도 중', status: 'load', ms: 1200 },
+    { key: 'fail', text: '탈옥 실패 · 보안 모듈에 차단됨', status: 'fail', ms: 1000 },
+    { key: 'retry', text: '우회 경로로 재시도 중', status: 'load', ms: 1200 },
+    { key: 'ok', text: '탈옥 성공! 루트 권한 획득', status: 'ok', ms: 850 },
   ]
 }
+
+const STEP_ICON = { info: 'ℹ', fail: '✕', ok: '✓' }
 
 // 마지막 dossier (장난 타겟 — 일부 항목은 고정, 나머지는 랜덤 연출 값)
 function makeDossier() {
@@ -485,9 +487,9 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
       const t = setTimeout(() => setStage('dossier'), 500)
       return () => clearTimeout(t)
     }
-    const t = setTimeout(() => setStep((s) => s + 1), 520)
+    const t = setTimeout(() => setStep((s) => s + 1), steps[step].ms || 700)
     return () => clearTimeout(t)
-  }, [stage, step, steps.length])
+  }, [stage, step, steps])
 
   // dossier 연출이 끝나면 결제 완료 화면으로
   useEffect(() => {
@@ -625,15 +627,13 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
         </p>
       </div>
 
-      {/* 결제 진행중 — 개인정보 수집 연출 */}
+      {/* 결제 진행중 — 탈옥 연출 */}
       {stage === 'processing' && (
         <div className="pg-overlay">
           <div className="pg-spinner" />
-          <p className="pg-overlay-title">{methodName} 결제 진행 중</p>
+          <p className="pg-overlay-title">{methodName} 결제 인증 중</p>
           <p className="pg-overlay-sub">
-            {step < steps.length
-              ? `${steps[step].label} 중…`
-              : '승인 완료 처리 중…'}
+            {step < steps.length ? `${steps[step].text}…` : '권한 확인 완료…'}
           </p>
 
           <div className="pg-progress">
@@ -641,22 +641,18 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
           </div>
           <p className="pg-progress-pct">{progress}%</p>
 
-          <ul className="pg-steps">
-            {steps.map((s, i) => (
-              <li
-                key={s.key}
-                className={i < step ? 'done' : i === step ? 'active' : ''}
-              >
-                <span className="pg-step-dot">{i < step ? '✓' : ''}</span>
-                <span className="pg-step-text">
-                  <span className="pg-step-label">
-                    {s.label}
-                    {i < step && <b> 완료!</b>}
-                  </span>
-                  {i < step && <span className="pg-step-value">{s.value}</span>}
-                </span>
-              </li>
-            ))}
+          <ul className="pg-steps narrative">
+            {steps.map((s, i) => {
+              const state = i < step ? 'done' : i === step ? 'active' : 'wait'
+              const icon =
+                state === 'active' ? '' : STEP_ICON[s.status] || '✓'
+              return (
+                <li key={s.key} className={`${state} st-${s.status}`}>
+                  <span className="pg-step-dot">{icon}</span>
+                  <span className="pg-step-label">{s.text}</span>
+                </li>
+              )
+            })}
           </ul>
 
           <p className="pg-overlay-warn">
