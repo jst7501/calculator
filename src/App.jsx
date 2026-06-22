@@ -627,39 +627,39 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
         </p>
       </div>
 
-      {/* 결제 진행중 — 탈옥 연출 */}
-      {stage === 'processing' && (
-        <div className="pg-overlay">
-          <div className="pg-spinner" />
-          <p className="pg-overlay-title">{methodName} 결제 인증 중</p>
-          <p className="pg-overlay-sub">
-            {step < steps.length ? `${steps[step].text}…` : '권한 확인 완료…'}
-          </p>
+      {/* 결제 진행중 — 탈옥 연출 (한 번에 한 단계만) */}
+      {stage === 'processing' && (() => {
+        const cur = steps[Math.min(step, steps.length - 1)]
+        return (
+          <div className={`pg-overlay drama st-${cur.status}`}>
+            <p className="pg-overlay-title">{methodName} 결제 인증 중</p>
 
-          <div className="pg-progress">
-            <div className="pg-progress-bar" style={{ width: `${progress}%` }} />
+            {/* 현재 한 단계만 크게 표시 */}
+            <div className="pg-stage" key={step}>
+              <div className={`pg-stage-icon st-${cur.status}`}>
+                {cur.status === 'load' ? (
+                  <span className="pg-stage-spinner" />
+                ) : (
+                  <span className="pg-stage-glyph">{STEP_ICON[cur.status]}</span>
+                )}
+              </div>
+              <p className={`pg-stage-text st-${cur.status}`}>
+                {cur.text}
+                {cur.status === 'load' ? '…' : ''}
+              </p>
+            </div>
+
+            <div className="pg-progress">
+              <div className="pg-progress-bar" style={{ width: `${progress}%` }} />
+            </div>
+            <p className="pg-progress-pct">{progress}%</p>
+
+            <p className="pg-overlay-warn">
+              결제가 진행 중입니다. 창을 닫지 마세요.
+            </p>
           </div>
-          <p className="pg-progress-pct">{progress}%</p>
-
-          <ul className="pg-steps narrative">
-            {steps.map((s, i) => {
-              const state = i < step ? 'done' : i === step ? 'active' : 'wait'
-              const icon =
-                state === 'active' ? '' : STEP_ICON[s.status] || '✓'
-              return (
-                <li key={s.key} className={`${state} st-${s.status}`}>
-                  <span className="pg-step-dot">{icon}</span>
-                  <span className="pg-step-label">{s.text}</span>
-                </li>
-              )
-            })}
-          </ul>
-
-          <p className="pg-overlay-warn">
-            결제가 진행 중입니다. 창을 닫지 마세요.
-          </p>
-        </div>
-      )}
+        )
+      })()}
 
       {/* 정보 수집 dossier — 결제화면처럼 자연스럽게 슥슥 등장 */}
       {stage === 'dossier' && (

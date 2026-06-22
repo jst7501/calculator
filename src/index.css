@@ -1433,3 +1433,78 @@ body {
   background: #2ad17f;
   border-color: #2ad17f;
 }
+
+/* ── 결제 진행 극적 연출 (한 단계씩) ── */
+.pg-overlay.drama { transition: background 0.3s ease; }
+.pg-overlay.drama.st-info { background: rgba(238, 244, 255, 0.97); }
+.pg-overlay.drama.st-fail { background: rgba(255, 236, 236, 0.97); }
+.pg-overlay.drama.st-ok { background: rgba(233, 250, 240, 0.97); }
+
+.pg-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 16px 0 30px;
+  animation: stage-in 0.4s cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+
+@keyframes stage-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pg-stage-icon {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2f7;
+}
+
+.pg-stage-icon.st-info { background: #e3edff; }
+.pg-stage-icon.st-fail { background: #ffe2e2; animation: shake 0.5s; }
+.pg-stage-icon.st-ok {
+  background: #d9f7e7;
+  animation: pop 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.5);
+}
+
+.pg-stage-spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 5px solid #cdd8ea;
+  border-top-color: #3182f6;
+  animation: spin 0.75s linear infinite;
+}
+
+.pg-stage-glyph {
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1;
+}
+.pg-stage-icon.st-info .pg-stage-glyph { color: #3182f6; }
+.pg-stage-icon.st-fail .pg-stage-glyph { color: #e23b3b; }
+.pg-stage-icon.st-ok .pg-stage-glyph { color: #15a35f; }
+
+.pg-stage-text {
+  font-size: 23px;
+  font-weight: 800;
+  text-align: center;
+  color: #1b1d22;
+  max-width: 320px;
+  line-height: 1.4;
+}
+.pg-stage-text.st-info { color: #2f6bd8; }
+.pg-stage-text.st-fail { color: #d23f3f; }
+.pg-stage-text.st-ok { color: #15a35f; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(9px); }
+  60% { transform: translateX(-7px); }
+  80% { transform: translateX(5px); }
+}
