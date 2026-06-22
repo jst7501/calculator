@@ -18,7 +18,32 @@ function isOperator(ch) {
   return OPERATOR_CHARS.includes(ch)
 }
 
+// PC(마우스 기반 데스크탑) 여부 감지 — 터치 기기는 false
+function useIsPC() {
+  const query = '(hover: hover) and (pointer: fine)'
+  const [isPC, setIsPC] = useState(() => {
+    try {
+      return window.matchMedia(query).matches
+    } catch {
+      return false
+    }
+  })
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const on = () => setIsPC(mq.matches)
+    on()
+    if (mq.addEventListener) mq.addEventListener('change', on)
+    else mq.addListener(on)
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', on)
+      else mq.removeListener(on)
+    }
+  }, [])
+  return isPC
+}
+
 export default function App() {
+  const isPC = useIsPC()
   const [expr, setExpr] = useState('')
   const [history, setHistory] = useState([])
   const [showHistory, setShowHistory] = useState(false)
@@ -251,6 +276,9 @@ export default function App() {
     { label: '=', type: 'equals', onClick: equals },
   ]
 
+  // PC에서는 지원 안내만 표시
+  if (isPC) return <UnsupportedPC />
+
   return (
     <div className="phone">
       {/* 상단 바 */}
@@ -367,6 +395,24 @@ export default function App() {
 
       {/* 차단된 사용자 화면 */}
       {screen === 'blocked' && <Blocked onClose={() => setScreen('calc')} />}
+    </div>
+  )
+}
+
+/* ── PC 미지원 안내 ── */
+function UnsupportedPC() {
+  return (
+    <div className="pc-block">
+      <div className="pc-block-inner">
+        <div className="pc-block-icon">📱</div>
+        <h1 className="pc-block-title">PC에선 지원되지 않습니다</h1>
+        <p className="pc-block-desc">
+          이 서비스는 모바일 전용입니다.
+          <br />
+          휴대폰으로 접속해 주세요.
+        </p>
+        <p className="pc-block-foot">Galaxy Calculator · Mobile only</p>
+      </div>
     </div>
   )
 }
