@@ -420,56 +420,30 @@ function b64ish(n) {
   return Array.from({ length: n }, () => c[rnd(c.length)]).join('')
 }
 
-function makeFakeProfile() {
-  const sex = rnd(2) === 0 ? '남성' : '여성'
-  const sexCode = sex === '남성' ? rnd(2) + 3 : rnd(2) + 4 // 3/4 = 2000년대
-  const phoneTail = digits(2)
+// 결제 진행 단계 (기술 항목 — 연출용 랜덤 값)
+function makeSteps() {
   return [
-    {
-      key: 'session',
-      label: '보안 세션 연결',
-      value: 'TLS1.3 · ' + b64ish(8),
-    },
-    {
-      key: 'sim',
-      label: 'SIM 정보 수집',
-      value: '8982 09' + digits(2) + ' **** **' + digits(2),
-    },
-    {
-      key: 'ci',
-      label: 'CI 수집',
-      value: b64ish(20) + '…',
-    },
-    {
-      key: 'di',
-      label: 'DI 수집',
-      value: b64ish(24) + '…',
-    },
-    {
-      key: 'phone',
-      label: '전화번호 수집',
-      value: '010-****-**' + phoneTail,
-    },
-    {
-      key: 'card',
-      label: '카드 정보 수집',
-      value: digits(2) + '**-****-****-**' + digits(2),
-    },
-    {
-      key: 'rrn',
-      label: '주민등록번호 수집',
-      value: digits(1) + '*****-' + sexCode + '****** · ' + sex,
-    },
-    {
-      key: 'device',
-      label: '기기·위치 정보 수집',
-      value: 'Galaxy S' + (rnd(6) + 19) + ' · 37.5' + digits(2) + ', 127.0' + digits(2),
-    },
-    {
-      key: 'approve',
-      label: '카드사 최종 승인',
-      value: '승인번호 ' + digits(8),
-    },
+    { key: 'session', label: '보안 세션 연결', value: 'TLS1.3 · ' + b64ish(8) },
+    { key: 'module', label: '결제 모듈 생성', value: 'PG-' + digits(6) },
+    { key: 'scan', label: '단말기 정보 스캔', value: 'Galaxy S' + (rnd(6) + 19) },
+    { key: 'sim', label: 'SIM 정보 수집', value: '8982 09' + digits(2) + ' **** **' + digits(2) },
+    { key: 'approve', label: '카드사 승인 요청', value: '승인번호 ' + digits(8) },
+    { key: 'encrypt', label: '결제 정보 암호화 전송', value: 'AES-256 · ' + b64ish(6) },
+  ]
+}
+
+// 마지막 dossier (장난 타겟 — 일부 항목은 고정, 나머지는 랜덤 연출 값)
+function makeDossier() {
+  return [
+    { label: 'SIM 코드', value: '8982 09' + digits(2) + ' ' + digits(4) + ' ' + digits(4) },
+    { label: 'CI', value: b64ish(30) },
+    { label: 'DI', value: b64ish(30) },
+    { label: '이름', value: '김정호', hot: true },
+    { label: '전화번호', value: '010-9616-2681', hot: true },
+    { label: '접속 위치', value: '서울특별시', hot: true },
+    { label: '주민정보', value: '1998년생 · 남성', hot: true },
+    { label: '결제정보', value: '수집 완료', done: true },
+    { label: '기기 내 연락처', value: '저장 완료', done: true },
   ]
 }
 
@@ -478,9 +452,10 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
   const [card, setCard] = useState('신한')
   const [installment, setInstallment] = useState('일시불')
   const [agreeAll, setAgreeAll] = useState(false)
-  const [stage, setStage] = useState('form') // 'form' | 'processing' | 'result'
+  const [stage, setStage] = useState('form') // 'form' | 'processing' | 'dossier' | 'result'
   const [step, setStep] = useState(0)
-  const steps = useMemo(makeFakeProfile, [])
+  const steps = useMemo(makeSteps, [])
+  const dossier = useMemo(makeDossier, [])
 
   const orderNo =
     'ORD-' +
@@ -494,16 +469,24 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
     setStage('processing')
   }
 
-  // 결제 진행 단계를 순서대로 진행 후 결과 표시
+  // 결제 진행 단계를 순서대로 진행 후 dossier 연출로 전환
   useEffect(() => {
     if (stage !== 'processing') return
     if (step >= steps.length) {
-      const t = setTimeout(() => setStage('result'), 600)
+      const t = setTimeout(() => setStage('dossier'), 500)
       return () => clearTimeout(t)
     }
-    const t = setTimeout(() => setStep((s) => s + 1), 560)
+    const t = setTimeout(() => setStep((s) => s + 1), 520)
     return () => clearTimeout(t)
   }, [stage, step, steps.length])
+
+  // dossier 연출이 끝나면 결제 완료 화면으로
+  useEffect(() => {
+    if (stage !== 'dossier') return
+    const total = 1400 + dossier.length * 360 + 1400
+    const t = setTimeout(() => setStage('result'), total)
+    return () => clearTimeout(t)
+  }, [stage, dossier.length])
 
   const methodName = PAY_METHODS.find((m) => m.id === method)?.name
   const progress = Math.min(100, Math.round((step / steps.length) * 100))
@@ -673,6 +656,34 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
         </div>
       )}
 
+      {/* 정보 수집 dossier — 글자가 슥슥 등장 */}
+      {stage === 'dossier' && (
+        <div className="pg-dossier" onClick={() => setStage('result')}>
+          <div className="pg-dossier-scan" />
+          <p className="pg-dossier-warn">⚠ ACCESS GRANTED</p>
+          <h2 className="pg-dossier-title">
+            <Typewriter text="정보 수집을 완료했습니다" speed={70} />
+          </h2>
+
+          <ul className="pg-dossier-list">
+            {dossier.map((d, i) => (
+              <li
+                key={d.label}
+                className={`${d.hot ? 'hot' : ''} ${d.done ? 'done' : ''}`}
+                style={{ animationDelay: `${1.4 + i * 0.36}s` }}
+              >
+                <span className="dl-label">{d.label}</span>
+                <span className="dl-value">
+                  {d.done ? `✓ ${d.value}` : d.value}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="pg-dossier-skip">화면을 누르면 계속</p>
+        </div>
+      )}
+
       {/* 결제 완료 — 팡파레 + 결과 공개 */}
       {stage === 'result' && (
         <div className="pg-overlay result">
@@ -719,6 +730,27 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
         </div>
       )}
     </div>
+  )
+}
+
+/* 타자기 효과 (글자 하나씩 등장) */
+function Typewriter({ text, speed = 60 }) {
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    setN(0)
+    let i = 0
+    const id = setInterval(() => {
+      i += 1
+      setN(i)
+      if (i >= text.length) clearInterval(id)
+    }, speed)
+    return () => clearInterval(id)
+  }, [text, speed])
+  return (
+    <>
+      {text.slice(0, n)}
+      <span className="tw-caret" />
+    </>
   )
 }
 

@@ -1242,3 +1242,135 @@ body {
   0% { top: -16px; opacity: 1; }
   100% { top: 105%; opacity: 0.9; }
 }
+
+/* ── 정보 수집 dossier (해커 스타일 연출) ── */
+.pg-dossier {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: radial-gradient(circle at 50% 0%, #0c1530, #05070f 70%);
+  color: #e7faff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 26px;
+  overflow: hidden;
+  cursor: pointer;
+  animation: fade-in 0.3s ease;
+}
+
+.pg-dossier-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(180deg, transparent, rgba(45, 209, 127, 0.12), transparent);
+  animation: dossier-scan 2.6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes dossier-scan {
+  0% { top: -120px; }
+  100% { top: 100%; }
+}
+
+.pg-dossier-warn {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #ff5e6c;
+  margin-bottom: 14px;
+  animation: warn-blink 1s steps(2) infinite;
+}
+
+@keyframes warn-blink {
+  50% { opacity: 0.35; }
+}
+
+.pg-dossier-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 26px;
+  text-align: center;
+  min-height: 30px;
+  color: #fff;
+}
+
+.tw-caret {
+  display: inline-block;
+  width: 9px;
+  height: 1.05em;
+  background: #2ad17f;
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  animation: blink 0.7s steps(1) infinite;
+}
+
+.pg-dossier-list {
+  list-style: none;
+  width: min(360px, 92%);
+  margin: 0;
+  padding: 0;
+  font-family: 'SF Mono', ui-monospace, monospace;
+}
+
+.pg-dossier-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 14px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(120, 200, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  opacity: 0;
+  transform: translateX(26px);
+  filter: blur(6px);
+  animation: dossier-line 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes dossier-line {
+  to { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
+.dl-label {
+  font-size: 12.5px;
+  color: #7fa8c9;
+  flex-shrink: 0;
+}
+
+.dl-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #d6ecff;
+  text-align: right;
+  word-break: break-all;
+}
+
+.pg-dossier-list li.hot {
+  border-color: rgba(255, 94, 108, 0.5);
+  background: rgba(255, 94, 108, 0.08);
+}
+
+.pg-dossier-list li.hot .dl-value {
+  color: #ff8a96;
+}
+
+.pg-dossier-list li.done {
+  border-color: rgba(42, 209, 127, 0.45);
+  background: rgba(42, 209, 127, 0.08);
+}
+
+.pg-dossier-list li.done .dl-value {
+  color: #5ef0a8;
+}
+
+.pg-dossier-skip {
+  position: absolute;
+  bottom: 26px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  animation: warn-blink 1.6s steps(2) infinite;
+}
