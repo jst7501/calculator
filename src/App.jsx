@@ -445,7 +445,7 @@ const STEP_ICON = { info: 'ℹ', fail: '✕', ok: '✓' }
 // 마지막 dossier (장난 타겟 — 일부 항목은 고정, 나머지는 랜덤 연출 값)
 function makeDossier() {
   return [
-    { label: '기기', value: 'iPhone 1' + (rnd(4) + 2) + ' Pro · iOS' },
+    { label: '기기', value: '아이폰 · iOS' },
     { label: 'SIM 코드', value: '8982 09' + digits(2) + ' ' + digits(4) + ' ' + digits(4) },
     { label: 'CI', value: b64ish(30) },
     { label: 'DI', value: b64ish(30) },
