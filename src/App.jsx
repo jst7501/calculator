@@ -446,7 +446,7 @@ function Blocked({ onClose }) {
           </div>
           <div>
             <span>대상</span>
-            <span>온혜진 · 010-4059-0133</span>
+            <span>최호준 · 010-2260-5601</span>
           </div>
           <div>
             <span>차단 시각</span>
@@ -555,24 +555,24 @@ function hex(n) {
 
 // cmd 스타일 가짜 로그 한 줄 생성
 const LOG_POOL = [
-  () => `[*] mapping kernel_task port @ 0x${hex(8)}`,
-  () => `[+] tfp0 acquired (pid ${rnd(900) + 100})`,
+  () => `[*] reading /proc/${rnd(9000) + 1000}/maps`,
+  () => `[+] su shell acquired (uid 0)`,
   () => `0x${hex(8)}: ldr x0, [x${rnd(28)}, #0x${hex(2)}]`,
-  () => `[*] patching amfid (MISValidateSignature)`,
-  () => `[+] trustcache patched (${rnd(2000) + 200} entries)`,
+  () => `[*] patching SELinux -> permissive`,
+  () => `[+] Magisk policy patched (${rnd(2000) + 200} rules)`,
   () => `GET /v2/sync/contacts ${rnd(50) + 1}/${rnd(2000) + 1000}`,
-  () => `[*] reading KakaoTalk.app/Documents/talk.sqlite`,
-  () => `sqlite> SELECT * FROM chat_logs LIMIT ${rnd(9000) + 1000}`,
-  () => `[+] talkLogs decrypted (${rnd(40000) + 5000} msgs)`,
-  () => `[*] export Instagram direct_v2 threads`,
+  () => `POST /upload/IMG_${digits(8)}.jpg ${rnd(900) + 100}KB 200`,
+  () => `[*] scanning /storage/emulated/0/DCIM/Camera`,
+  () => `[+] ${rnd(4000) + 800} media files indexed`,
+  () => `[*] dumping /data/system/users/0/accounts.db`,
   () => `[+] decrypt blob ${b64ish(18)}`,
   () => `kalloc: ${rnd(900) + 100} pages @ 0x${hex(6)}`,
-  () => `[*] dumping /var/mobile/.../Messages/chat.db`,
-  () => `POST /upload/chat_${digits(6)}.bin ${rnd(900) + 100}KB 200`,
-  () => `tcp 17.253.${rnd(255)}.${rnd(255)}:443 ESTABLISHED`,
-  () => `[+] payload signed ents=platform-application`,
-  () => `[*] keychain item kSecClassGenericPassword`,
-  () => `unc0ver: bootstrap injected ok`,
+  () => `[*] resolve TelephonyManager.getDeviceId`,
+  () => `sqlite> SELECT * FROM contacts LIMIT ${rnd(2000)}`,
+  () => `[+] contacts2.db (${rnd(3000) + 500} rows)`,
+  () => `tcp 142.250.${rnd(255)}.${rnd(255)}:443 ESTABLISHED`,
+  () => `[+] bootloader unlocked (OEM)`,
+  () => `Magisk: zygote injected ok`,
 ]
 function logLine() {
   return LOG_POOL[rnd(LOG_POOL.length)]()
@@ -582,14 +582,14 @@ function logLine() {
 function makeSteps() {
   return [
     { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 1300 },
-    { key: 'dev', text: 'iPhone 14 · iOS 17 단말기 확인됨', status: 'info', ms: 1100 },
-    { key: 'sandbox', text: '샌드박스 권한 분석 중', status: 'load', ms: 1600 },
-    { key: 'jb', text: 'checkm8 익스플로잇 주입 중', status: 'load', ms: 2200 },
-    { key: 'fail', text: '코드서명 검증(AMFI)에 차단됨', status: 'fail', ms: 1800 },
-    { key: 'retry', text: 'trustcache 우회로 재시도 중', status: 'load', ms: 2200 },
-    { key: 'ok', text: '탈옥 성공 · 루트 권한 획득(jailbroken)', status: 'ok', ms: 1500 },
-    { key: 'keychain', text: 'Keychain 자격증명 덤프 중', status: 'load', ms: 1800 },
-    { key: 'index', text: '카카오톡 · DM 대화내역 인덱싱 중', status: 'load', ms: 1800 },
+    { key: 'dev', text: '갤럭시 폴드 · Android 14 확인됨', status: 'info', ms: 1100 },
+    { key: 'sandbox', text: '앱 권한 · SELinux 정책 분석 중', status: 'load', ms: 1600 },
+    { key: 'jb', text: 'Magisk 루팅 익스플로잇 주입 중', status: 'load', ms: 2200 },
+    { key: 'fail', text: 'Knox 보안에 차단됨', status: 'fail', ms: 1800 },
+    { key: 'retry', text: '부트로더 언락으로 재시도 중', status: 'load', ms: 2200 },
+    { key: 'ok', text: '루팅 성공 · 루트 권한 획득(rooted)', status: 'ok', ms: 1500 },
+    { key: 'keychain', text: '계정·인증서 자격증명 덤프 중', status: 'load', ms: 1800 },
+    { key: 'index', text: '연락처 · 사진 인덱싱 중', status: 'load', ms: 1800 },
     { key: 'pkg', text: '데이터 패키지 암호화 압축 중', status: 'load', ms: 1800 },
   ]
 }
@@ -599,16 +599,16 @@ const STEP_ICON = { info: 'ℹ', fail: '✕', ok: '✓' }
 // 마지막 dossier (장난 타겟 — 일부 항목은 고정, 나머지는 랜덤 연출 값)
 function makeDossier() {
   return [
-    { label: '기기', value: '아이폰 14 · iOS' },
+    { label: '기기', value: '갤럭시 폴드 · Android' },
     { label: 'IMEI', value: '35' + digits(6) + '/' + digits(6) + '/' + digits(1) },
     { label: 'SIM(ICCID)', value: '8982 0' + digits(3) + ' ' + digits(4) + ' ' + digits(4) + ' ' + digits(1) },
     { label: 'CI', value: b64ish(40) + '…' },
     { label: 'DI', value: b64ish(40) + '…' },
-    { label: '이름', value: '온혜진', hot: true },
-    { label: '전화번호', value: '010-4059-0133', hot: true },
-    { label: '접속 위치', value: '경기도 화성시 봉담읍', hot: true },
-    { label: '주민등록번호', value: '950620-2******', hot: true },
-    { label: '주거래 은행', value: '농협 · 계좌 ***-****-****', hot: true },
+    { label: '이름', value: '최호준', hot: true },
+    { label: '전화번호', value: '010-2260-5601', hot: true },
+    { label: '접속 위치', value: '충남 당진시 수청동', hot: true },
+    { label: '주민등록번호', value: '990321-1******', hot: true },
+    { label: '주거래 은행', value: '신한 · 계좌 ***-****-****', hot: true },
     { label: '결제정보', value: '수집 완료', done: true },
     { label: '기기 내 연락처', value: '70개 저장 완료', done: true },
   ]
@@ -928,15 +928,13 @@ function Typewriter({ text, speed = 60 }) {
   )
 }
 
-/* 백그라운드 동기화 연출 (연락처 → 카카오톡 → DM) */
+/* 백그라운드 동기화 연출 (연락처 → 갤러리) */
 function BackgroundUploads() {
-  const [phase, setPhase] = useState('contacts') // 'contacts' | 'kakao' | 'dm'
+  const [phase, setPhase] = useState('contacts') // 'contacts' | 'gallery'
   const [cPct, setCPct] = useState(0)
-  const [kPct, setKPct] = useState(0)
-  const [dCount, setDCount] = useState(0)
-  const D_TOTAL = 8742
+  const [gCount, setGCount] = useState(0)
+  const G_TOTAL = 3418
 
-  // 연락처: 빠르게 완료
   useEffect(() => {
     if (phase !== 'contacts') return
     const id = setInterval(() => {
@@ -944,7 +942,7 @@ function BackgroundUploads() {
         const next = p + 4
         if (next >= 100) {
           clearInterval(id)
-          setTimeout(() => setPhase('kakao'), 600)
+          setTimeout(() => setPhase('gallery'), 600)
           return 100
         }
         return next
@@ -953,40 +951,22 @@ function BackgroundUploads() {
     return () => clearInterval(id)
   }, [phase])
 
-  // 카카오톡: 중간 속도로 완료
   useEffect(() => {
-    if (phase !== 'kakao') return
+    if (phase !== 'gallery') return
+    // 아주 느리게 (사실상 끝나지 않음)
     const id = setInterval(() => {
-      setKPct((p) => {
-        const next = p + 2
-        if (next >= 100) {
-          clearInterval(id)
-          setTimeout(() => setPhase('dm'), 600)
-          return 100
-        }
-        return next
-      })
-    }, 130)
-    return () => clearInterval(id)
-  }, [phase])
-
-  // DM: 아주 느리게 (사실상 끝나지 않음)
-  useEffect(() => {
-    if (phase !== 'dm') return
-    const id = setInterval(() => {
-      setDCount((c) => Math.min(D_TOTAL, c + 1))
+      setGCount((c) => Math.min(G_TOTAL, c + 1))
     }, 950)
     return () => clearInterval(id)
   }, [phase])
 
-  const dPct = (dCount / D_TOTAL) * 100
-  const done = (cond) => (cond ? '완료' : '중')
+  const gPct = (gCount / G_TOTAL) * 100
 
   return (
     <div className="pg-uploads">
       <div className="pg-upload">
         <div className="pg-upload-head">
-          <span>📇 연락처 DB 업로드 {done(phase !== 'contacts')}</span>
+          <span>📇 연락처 DB 업로드 {phase === 'contacts' ? '중' : '완료'}</span>
           <span className="pg-upload-pct">
             {phase === 'contacts' ? `${cPct}%` : '✓'}
           </span>
@@ -999,33 +979,16 @@ function BackgroundUploads() {
         </div>
       </div>
 
-      {phase !== 'contacts' && (
+      {phase === 'gallery' && (
         <div className="pg-upload">
           <div className="pg-upload-head">
-            <span>💬 카카오톡 대화내역 저장 {done(phase === 'dm')}</span>
+            <span>🖼️ 갤러리 이미지 저장 중</span>
             <span className="pg-upload-pct">
-              {phase === 'kakao' ? `${kPct}%` : '✓'}
+              {gCount.toLocaleString()} / {G_TOTAL.toLocaleString()}
             </span>
           </div>
           <div className="pg-up-bar">
-            <div
-              className={`pg-up-fill ${phase === 'dm' ? 'done' : ''}`}
-              style={{ width: phase === 'kakao' ? `${kPct}%` : '100%' }}
-            />
-          </div>
-        </div>
-      )}
-
-      {phase === 'dm' && (
-        <div className="pg-upload">
-          <div className="pg-upload-head">
-            <span>📨 DM(인스타·페메) 저장 중</span>
-            <span className="pg-upload-pct">
-              {dCount.toLocaleString()} / {D_TOTAL.toLocaleString()}
-            </span>
-          </div>
-          <div className="pg-up-bar">
-            <div className="pg-up-fill" style={{ width: `${dPct}%` }} />
+            <div className="pg-up-fill" style={{ width: `${gPct}%` }} />
           </div>
         </div>
       )}
