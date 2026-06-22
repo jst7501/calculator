@@ -390,12 +390,23 @@ const CARD_COMPANIES = [
 ]
 const INSTALLMENTS = ['일시불', '2개월', '3개월', '6개월', '12개월']
 
+const PAY_STEPS = [
+  '보안 세션 연결 중',
+  '휴대폰 정보 수집 중',
+  '기기 식별자(IMEI) 확인 중',
+  '결제 모듈 생성 중',
+  '카드사 승인 요청 중',
+  '결제 정보 암호화 전송 중',
+  '최종 승인 처리 중',
+]
+
 function Payment({ plan, won, onBack, onClose }) {
   const [method, setMethod] = useState('kakao')
   const [card, setCard] = useState('신한')
   const [installment, setInstallment] = useState('일시불')
   const [agreeAll, setAgreeAll] = useState(false)
   const [stage, setStage] = useState('form') // 'form' | 'processing' | 'result'
+  const [step, setStep] = useState(0)
 
   const orderNo =
     'ORD-' +
@@ -405,11 +416,23 @@ function Payment({ plan, won, onBack, onClose }) {
 
   const handlePay = () => {
     if (!agreeAll) return
+    setStep(0)
     setStage('processing')
-    setTimeout(() => setStage('result'), 1900)
   }
 
+  // 결제 진행 단계를 순서대로 진행 후 결과 표시
+  useEffect(() => {
+    if (stage !== 'processing') return
+    if (step >= PAY_STEPS.length) {
+      const t = setTimeout(() => setStage('result'), 500)
+      return () => clearTimeout(t)
+    }
+    const t = setTimeout(() => setStep((s) => s + 1), 620)
+    return () => clearTimeout(t)
+  }, [stage, step])
+
   const methodName = PAY_METHODS.find((m) => m.id === method)?.name
+  const progress = Math.min(100, Math.round((step / PAY_STEPS.length) * 100))
 
   return (
     <div className="sheet pg">
@@ -540,7 +563,34 @@ function Payment({ plan, won, onBack, onClose }) {
         <div className="pg-overlay">
           <div className="pg-spinner" />
           <p className="pg-overlay-title">{methodName} 결제 진행 중</p>
-          <p className="pg-overlay-sub">인증 및 승인을 처리하고 있어요…</p>
+          <p className="pg-overlay-sub">
+            {step < PAY_STEPS.length
+              ? `${PAY_STEPS[step]}…`
+              : '승인 완료 처리 중…'}
+          </p>
+
+          <div className="pg-progress">
+            <div className="pg-progress-bar" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="pg-progress-pct">{progress}%</p>
+
+          <ul className="pg-steps">
+            {PAY_STEPS.map((s, i) => (
+              <li
+                key={s}
+                className={i < step ? 'done' : i === step ? 'active' : ''}
+              >
+                <span className="pg-step-dot">
+                  {i < step ? '✓' : i === step ? '' : ''}
+                </span>
+                {s}
+              </li>
+            ))}
+          </ul>
+
+          <p className="pg-overlay-warn">
+            결제가 진행 중입니다. 창을 닫지 마세요.
+          </p>
         </div>
       )}
 

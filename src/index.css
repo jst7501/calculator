@@ -907,12 +907,13 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px;
+  padding: 40px 30px;
   z-index: 6;
+  overflow-y: auto;
   animation: fade-in 0.2s ease;
 }
 
-.pg-overlay.result { justify-content: flex-start; padding-top: 56px; overflow-y: auto; }
+.pg-overlay.result { justify-content: flex-start; padding-top: 56px; }
 
 .pg-spinner {
   width: 52px;
@@ -936,7 +937,85 @@ body {
 
 .pg-overlay-sub {
   font-size: 13.5px;
-  color: #8b8e96;
+  color: #3182f6;
+  font-weight: 600;
+  min-height: 19px;
+}
+
+/* 진행바 */
+.pg-progress {
+  width: min(280px, 80%);
+  height: 7px;
+  background: #e3e7ee;
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 20px 0 8px;
+}
+
+.pg-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3182f6, #5b9bff);
+  border-radius: 99px;
+  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pg-progress-pct {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b6e78;
+  margin-bottom: 18px;
+}
+
+/* 단계 체크리스트 */
+.pg-steps {
+  list-style: none;
+  width: min(300px, 86%);
+  margin: 0 0 18px;
+  padding: 0;
+  text-align: left;
+}
+
+.pg-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #b2b5bd;
+  padding: 5px 0;
+  transition: color 0.25s;
+}
+
+.pg-steps li.done { color: #1c7a4a; }
+.pg-steps li.active { color: #1b1d22; font-weight: 700; }
+
+.pg-step-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #d3d6dd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.pg-steps li.done .pg-step-dot {
+  background: #2ad17f;
+  border-color: #2ad17f;
+}
+
+.pg-steps li.active .pg-step-dot {
+  border-color: #3182f6;
+  border-top-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
+.pg-overlay-warn {
+  font-size: 12px;
+  color: #c0392b;
+  font-weight: 600;
 }
 
 .pg-result-badge {
