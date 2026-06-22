@@ -246,6 +246,7 @@ body {
   align-items: flex-end;
   gap: 10px;
   animation: fade-up 0.25s ease;
+  cursor: pointer;
 }
 
 .locked-expr {

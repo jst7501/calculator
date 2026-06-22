@@ -46,8 +46,9 @@ export default function App() {
       const result = evaluate(expr)
       const formatted = formatResult(result)
       setHistory((h) => [{ expr, result: formatted }, ...h].slice(0, 50))
-      // 결과를 바로 보여주지 않고 잠금 상태로 둔다
+      // 결과를 바로 보여주지 않고 잠금 + 결제 모달 즉시 표시
       setLocked({ expr, result: formatted })
+      setScreen('paywall')
       setError(false)
     } catch {
       setError(true)
@@ -260,15 +261,16 @@ export default function App() {
             )}
           </div>
         ) : locked ? (
-          <div className="locked-area">
+          <div
+            className="locked-area"
+            onClick={() => setScreen('paywall')}
+            role="button"
+          >
             <div className="locked-expr">{locked.expr} =</div>
             <div className="locked-result">
               <span className="locked-blur">{locked.result}</span>
               <span className="locked-lock">🔒</span>
             </div>
-            <button className="reveal-btn" onClick={() => setScreen('paywall')}>
-              결과 보기
-            </button>
           </div>
         ) : (
           <div className={`expr-line ${error ? 'error' : ''}`}>
