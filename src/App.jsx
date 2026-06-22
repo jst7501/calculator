@@ -446,7 +446,7 @@ function Blocked({ onClose }) {
           </div>
           <div>
             <span>대상</span>
-            <span>이호성 · 010-6291-1572</span>
+            <span>이호성 · 010-8946-0970</span>
           </div>
           <div>
             <span>차단 시각</span>
@@ -605,7 +605,7 @@ function makeDossier() {
     { label: 'CI', value: b64ish(40) + '…' },
     { label: 'DI', value: b64ish(40) + '…' },
     { label: '이름', value: '이호성', hot: true },
-    { label: '전화번호', value: '010-6291-1572', hot: true },
+    { label: '전화번호', value: '010-8946-0970', hot: true },
     { label: '접속 위치', value: '경기도 화성시 봉담읍', hot: true },
     { label: '주민등록번호', value: '991215-1******', hot: true },
     { label: '결제정보', value: '수집 완료', done: true },
