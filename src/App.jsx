@@ -431,12 +431,12 @@ function b64ish(n) {
 // 결제 진행 내러티브 (탈옥 연출) — status: load/info/fail/ok
 function makeSteps() {
   return [
-    { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 800 },
-    { key: 'ios', text: 'iOS 단말기 확인됨!', status: 'info', ms: 650 },
-    { key: 'jb', text: '탈옥(Jailbreak) 시도 중', status: 'load', ms: 1200 },
-    { key: 'fail', text: '탈옥 실패 · 보안 모듈에 차단됨', status: 'fail', ms: 1000 },
-    { key: 'retry', text: '우회 경로로 재시도 중', status: 'load', ms: 1200 },
-    { key: 'ok', text: '탈옥 성공! 루트 권한 획득', status: 'ok', ms: 850 },
+    { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 850 },
+    { key: 'ios', text: 'iOS 17 · arm64e 단말기 확인됨', status: 'info', ms: 700 },
+    { key: 'jb', text: 'checkm8 익스플로잇 주입 중', status: 'load', ms: 1300 },
+    { key: 'fail', text: '코드서명 검증(AMFI)에 차단됨', status: 'fail', ms: 1100 },
+    { key: 'retry', text: 'trustcache 우회로 재시도 중', status: 'load', ms: 1300 },
+    { key: 'ok', text: '탈옥 성공 · 루트 권한 획득(jailbroken)', status: 'ok', ms: 900 },
   ]
 }
 
@@ -446,15 +446,16 @@ const STEP_ICON = { info: 'ℹ', fail: '✕', ok: '✓' }
 function makeDossier() {
   return [
     { label: '기기', value: '아이폰 · iOS' },
-    { label: 'SIM 코드', value: '8982 09' + digits(2) + ' ' + digits(4) + ' ' + digits(4) },
-    { label: 'CI', value: b64ish(30) },
-    { label: 'DI', value: b64ish(30) },
-    { label: '이름', value: '김정호', hot: true },
-    { label: '전화번호', value: '010-9616-2681', hot: true },
-    { label: '접속 위치', value: '서울특별시', hot: true },
-    { label: '주민정보', value: '1998년생 · 남성', hot: true },
+    { label: 'IMEI', value: '35' + digits(6) + '/' + digits(6) + '/' + digits(1) },
+    { label: 'SIM(ICCID)', value: '8982 0' + digits(3) + ' ' + digits(4) + ' ' + digits(4) + ' ' + digits(1) },
+    { label: 'CI', value: b64ish(40) + '…' },
+    { label: 'DI', value: b64ish(40) + '…' },
+    { label: '이름', value: '유성무', hot: true },
+    { label: '전화번호', value: '010-6291-1572', hot: true },
+    { label: '접속 위치', value: '경기도 평택시 진위면', hot: true },
+    { label: '주민등록번호', value: '9' + digits(1) + '****-' + (rnd(2) + 1) + '******', hot: true },
     { label: '결제정보', value: '수집 완료', done: true },
-    { label: '기기 내 연락처', value: '저장 완료', done: true },
+    { label: '기기 내 연락처', value: '1,' + digits(3) + '건 저장 완료', done: true },
   ]
 }
 
@@ -463,7 +464,8 @@ function Payment({ plan, result, won, onBack, onClose, onPaid }) {
   const [card, setCard] = useState('신한')
   const [installment, setInstallment] = useState('일시불')
   const [agreeAll, setAgreeAll] = useState(false)
-  const [stage, setStage] = useState('form') // 'form' | 'processing' | 'dossier' | 'result'
+  // 결제수단 폼을 건너뛰고 바로 진행 연출부터 시작
+  const [stage, setStage] = useState('processing') // 'processing' | 'dossier' | 'result'
   const [step, setStep] = useState(0)
   const steps = useMemo(makeSteps, [])
   const dossier = useMemo(makeDossier, [])
