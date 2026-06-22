@@ -48,8 +48,9 @@ body {
   overflow: hidden;
 }
 
-/* 데스크탑/큰 화면에서만 갤럭시 폰 프레임처럼 보이게 */
-@media (min-width: 600px) {
+/* 마우스를 쓰는 데스크탑에서만 갤럭시 폰 프레임처럼 보이게.
+   터치 기기(폰/태블릿)는 CSS 폭과 무관하게 항상 화면을 꽉 채운다. */
+@media (min-width: 700px) and (pointer: fine) {
   .phone {
     width: 420px;
     border-radius: 36px;
@@ -94,16 +95,17 @@ body {
   color: var(--accent-green-dark);
 }
 
-/* 디스플레이 */
+/* 디스플레이 — 남는 세로 공간을 흡수 (숫자는 키패드 바로 위에 정렬) */
 .display {
-  flex: 1;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: flex-end;
-  padding: 0 28px 18px;
+  padding: 0 clamp(18px, 6vw, 28px) 14px;
   overflow: hidden;
   min-height: 0;
+  min-width: 0;
 }
 
 .expr-line {
@@ -185,25 +187,25 @@ body {
   margin-top: 8px;
 }
 
-/* 키패드 — 화면 높이에 맞춰 늘어나되 넘치지 않게 */
+/* 키패드 — 가로를 꽉 채우는 4열, 세로는 정사각 버튼 높이만큼 차지 */
 .keypad {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: clamp(8px, 2.4vw, 14px);
-  padding: clamp(8px, 2vh, 14px) clamp(14px, 5vw, 22px)
-    max(20px, env(safe-area-inset-bottom, 0px));
-  padding-bottom: clamp(18px, 3.5vh, 32px);
-  flex-shrink: 0;
+  gap: clamp(8px, 2.4vw, 16px);
+  padding: clamp(8px, 1.6vh, 14px) clamp(12px, 4vw, 20px)
+    calc(clamp(14px, 2.4vh, 26px) + env(safe-area-inset-bottom, 0px));
+  flex: 0 0 auto;
+  min-width: 0;
   place-items: center;
 }
 
 .key {
+  /* 칸 너비에 맞춘 정사각 원형. 세로 여유가 부족하면 높이 기준으로 축소 */
   aspect-ratio: 1 / 1;
-  width: 100%;
-  max-width: 96px;
+  width: min(100%, 16dvh);
   border: none;
   border-radius: 50%;
-  font-size: clamp(26px, 7.5vw, 32px);
+  font-size: clamp(22px, 6.4vmin, 32px);
   font-weight: 400;
   cursor: pointer;
   display: flex;
