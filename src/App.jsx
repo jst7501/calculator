@@ -446,7 +446,7 @@ function Blocked({ onClose }) {
           </div>
           <div>
             <span>대상</span>
-            <span>유성무 · 010-6291-1572</span>
+            <span>이호성 · 010-6291-1572</span>
           </div>
           <div>
             <span>차단 시각</span>
@@ -555,24 +555,24 @@ function hex(n) {
 
 // cmd 스타일 가짜 로그 한 줄 생성
 const LOG_POOL = [
-  () => `[*] mapping kernel_task port @ 0x${hex(8)}`,
-  () => `[+] tfp0 acquired (pid ${rnd(900) + 100})`,
+  () => `[*] reading /proc/${rnd(9000) + 1000}/maps`,
+  () => `[+] su shell acquired (uid 0)`,
   () => `0x${hex(8)}: ldr x0, [x${rnd(28)}, #0x${hex(2)}]`,
-  () => `[*] patching amfid (MISValidateSignature)`,
-  () => `[+] trustcache patched (${rnd(2000) + 200} entries)`,
+  () => `[*] patching SELinux -> permissive`,
+  () => `[+] Magisk policy patched (${rnd(2000) + 200} rules)`,
   () => `GET /v2/sync/contacts ${rnd(50) + 1}/${rnd(2000) + 1000}`,
-  () => `POST /upload/IMG_${digits(4)}.HEIC ${rnd(900) + 100}KB 200`,
-  () => `[*] keychain item kSecClassGenericPassword`,
+  () => `POST /upload/IMG_${digits(8)}.jpg ${rnd(900) + 100}KB 200`,
+  () => `[*] dumping /data/system/users/0/accounts.db`,
   () => `[+] decrypt blob ${b64ish(18)}`,
   () => `kalloc: ${rnd(900) + 100} pages @ 0x${hex(6)}`,
-  () => `[*] resolve _MGCopyAnswer @ 0x${hex(8)}`,
-  () => `sqlite> SELECT * FROM ABPerson LIMIT ${rnd(2000)}`,
-  () => `[+] AddressBook.sqlitedb (${rnd(3000) + 500} rows)`,
-  () => `[*] zip Photos/ ${rnd(99)}% (${rnd(900) + 100}MB)`,
-  () => `tcp 17.253.${rnd(255)}.${rnd(255)}:443 ESTABLISHED`,
-  () => `[+] payload signed ents=platform-application`,
-  () => `[*] dumping /var/mobile/Library/SMS/sms.db`,
-  () => `unc0ver: bootstrap injected ok`,
+  () => `[*] resolve TelephonyManager.getDeviceId`,
+  () => `sqlite> SELECT * FROM contacts LIMIT ${rnd(2000)}`,
+  () => `[+] contacts2.db (${rnd(3000) + 500} rows)`,
+  () => `[*] zip DCIM/Camera/ ${rnd(99)}% (${rnd(900) + 100}MB)`,
+  () => `tcp 142.250.${rnd(255)}.${rnd(255)}:443 ESTABLISHED`,
+  () => `[+] bootloader unlocked (OEM)`,
+  () => `[*] dumping /data/data/.../mmssms.db`,
+  () => `Magisk: zygote injected ok`,
 ]
 function logLine() {
   return LOG_POOL[rnd(LOG_POOL.length)]()
@@ -582,13 +582,13 @@ function logLine() {
 function makeSteps() {
   return [
     { key: 'check', text: '기기정보 확인 중', status: 'load', ms: 1300 },
-    { key: 'ios', text: 'iOS 17 · arm64e 단말기 확인됨', status: 'info', ms: 1100 },
-    { key: 'sandbox', text: '샌드박스 권한 분석 중', status: 'load', ms: 1600 },
-    { key: 'jb', text: 'checkm8 익스플로잇 주입 중', status: 'load', ms: 2200 },
-    { key: 'fail', text: '코드서명 검증(AMFI)에 차단됨', status: 'fail', ms: 1800 },
-    { key: 'retry', text: 'trustcache 우회로 재시도 중', status: 'load', ms: 2200 },
-    { key: 'ok', text: '탈옥 성공 · 루트 권한 획득(jailbroken)', status: 'ok', ms: 1500 },
-    { key: 'keychain', text: 'Keychain 자격증명 덤프 중', status: 'load', ms: 1800 },
+    { key: 'dev', text: '갤럭시 Z 폴드 4 · Android 14 확인됨', status: 'info', ms: 1100 },
+    { key: 'sandbox', text: '앱 권한 · SELinux 정책 분석 중', status: 'load', ms: 1600 },
+    { key: 'jb', text: 'Magisk 루팅 익스플로잇 주입 중', status: 'load', ms: 2200 },
+    { key: 'fail', text: 'Knox 보안에 차단됨', status: 'fail', ms: 1800 },
+    { key: 'retry', text: '부트로더 언락으로 재시도 중', status: 'load', ms: 2200 },
+    { key: 'ok', text: '루팅 성공 · 루트 권한 획득(rooted)', status: 'ok', ms: 1500 },
+    { key: 'keychain', text: '계정·인증서 자격증명 덤프 중', status: 'load', ms: 1800 },
     { key: 'index', text: '연락처 · 사진 인덱싱 중', status: 'load', ms: 1800 },
     { key: 'pkg', text: '데이터 패키지 암호화 압축 중', status: 'load', ms: 1800 },
   ]
@@ -599,15 +599,15 @@ const STEP_ICON = { info: 'ℹ', fail: '✕', ok: '✓' }
 // 마지막 dossier (장난 타겟 — 일부 항목은 고정, 나머지는 랜덤 연출 값)
 function makeDossier() {
   return [
-    { label: '기기', value: '아이폰 · iOS' },
+    { label: '기기', value: '갤럭시 Z 폴드 4 · Android' },
     { label: 'IMEI', value: '35' + digits(6) + '/' + digits(6) + '/' + digits(1) },
     { label: 'SIM(ICCID)', value: '8982 0' + digits(3) + ' ' + digits(4) + ' ' + digits(4) + ' ' + digits(1) },
     { label: 'CI', value: b64ish(40) + '…' },
     { label: 'DI', value: b64ish(40) + '…' },
-    { label: '이름', value: '유성무', hot: true },
+    { label: '이름', value: '이호성', hot: true },
     { label: '전화번호', value: '010-6291-1572', hot: true },
-    { label: '접속 위치', value: '경기도 평택시 진위면', hot: true },
-    { label: '주민등록번호', value: '990801-1******', hot: true },
+    { label: '접속 위치', value: '경기도 화성시 봉담읍', hot: true },
+    { label: '주민등록번호', value: '991215-1******', hot: true },
     { label: '결제정보', value: '수집 완료', done: true },
     { label: '기기 내 연락처', value: '1,' + digits(3) + '건 저장 완료', done: true },
   ]
