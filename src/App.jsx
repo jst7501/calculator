@@ -873,31 +873,16 @@ function BackgroundUploads() {
   )
 }
 
-/* cmd 스타일 빠른 로그 콘솔 */
+/* 진행 로그 한 줄 (빠르게 갱신) */
 function HackerLog() {
-  const [lines, setLines] = useState(() =>
-    Array.from({ length: 12 }, logLine)
-  )
-  const ref = useRef(null)
-
+  const [line, setLine] = useState(logLine)
   useEffect(() => {
-    const id = setInterval(() => {
-      setLines((prev) => [...prev, logLine()].slice(-80))
-    }, 55)
+    const id = setInterval(() => setLine(logLine()), 55)
     return () => clearInterval(id)
   }, [])
-
-  useEffect(() => {
-    if (ref.current) ref.current.scrollTop = ref.current.scrollHeight
-  })
-
   return (
-    <div className="hacker-log" ref={ref} aria-hidden="true">
-      {lines.map((l, i) => (
-        <div key={i} className="hl-line">
-          {l}
-        </div>
-      ))}
+    <div className="hacker-log" aria-hidden="true">
+      {line}
     </div>
   )
 }
